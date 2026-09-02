@@ -4,7 +4,7 @@ A decision-support application for Sales Engineering leaders.
 
 A good SE organization should have an explicit playbook, but having a playbook does not mean never making exceptions. Teams should make exceptions consciously, record them, and learn from the results. The playbook should evolve based on evidence.
 
-This repository is a product rebuild of that idea. The intended primary areas are Playbook Health, Activity Explorer, and Admin Console. Phase 1 ships the domain model, forward migrations, a replaceable development dataset, and a status page that proves the workspace is live.
+This repository is a product rebuild of that idea. The primary areas are Playbook Health, Activity Explorer, and Admin Console. The landing page is Playbook Health.
 
 ## Local setup
 
@@ -60,5 +60,6 @@ The seed is small, coherent, and replaceable. It plants:
 
 | Phase | Intent | Status |
 | --- | --- | --- |
-| 1 | Domain model, migrations, development data | In progress |
-| 2–12 | Shell, Admin, Explorer, analytics, Health, AI, polish | Not started |
+| 1 | Domain model, migrations, development data | Done |
+| 2 | Navigation and application shell | In progress |
+| 3–12 | Admin versioning, Explorer, analytics, Health, AI, polish | Not started |
