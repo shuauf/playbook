@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
-import { ComingPanel } from "@/components/coming-panel"
+import { ActivityTimeline } from "@/components/activity-timeline"
 import { PageIntro } from "@/components/page-intro"
 import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
@@ -30,6 +30,12 @@ export default async function OpportunityDetailPage({
         </PageIntro>
         <div className="flex flex-wrap gap-2">
           <Badge variant="outline">{opportunity.outcome}</Badge>
+          <Link
+            href={`/activity/new?opportunity=${opportunity.id}`}
+            className={cn(buttonVariants())}
+          >
+            Add Activity
+          </Link>
           <Link href="/activity?view=opportunities" className={cn(buttonVariants({ variant: "outline" }))}>
             Back to explorer
           </Link>
@@ -60,31 +66,10 @@ export default async function OpportunityDetailPage({
         <CardHeader>
           <CardTitle>Sales activity timeline</CardTitle>
         </CardHeader>
-        <CardContent className="divide-y">
-          {opportunity.activities.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No sales activities recorded.</p>
-          ) : (
-            opportunity.activities.map((activity) => (
-              <div key={activity.id} className="flex flex-col gap-1 py-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="font-medium">{activity.playName}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {activity.date} · {activity.stageAtActivity} · {activity.seName}
-                  </p>
-                </div>
-                {activity.captureKind === "undefined" ? (
-                  <Badge variant="outline">Undefined</Badge>
-                ) : null}
-              </div>
-            ))
-          )}
+        <CardContent>
+          <ActivityTimeline activities={opportunity.activities} />
         </CardContent>
       </Card>
-
-      <ComingPanel title="Expandable prerequisite snapshots">
-        Each activity will open the exact Met / Not Met snapshot recorded at the time. Undefined
-        activities will keep showing that prerequisite status was unknown.
-      </ComingPanel>
     </div>
   )
 }

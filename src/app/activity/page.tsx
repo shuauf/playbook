@@ -1,6 +1,6 @@
 import { ExplorerView } from "@/components/explorer-view"
-import { parseExplorerView } from "@/lib/navigation"
-import { listActivityPreviews, listOpportunityPreviews } from "@/lib/playbook/queries"
+import { parseExplorerFilters } from "@/lib/navigation"
+import { listExplorerData, listPeople, listPlayDefinitions } from "@/lib/playbook/queries"
 
 export const dynamic = "force-dynamic"
 export const runtime = "nodejs"
@@ -10,17 +10,20 @@ export default async function ActivityPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
-  const params = await searchParams
-  const [opportunities, activities] = await Promise.all([
-    listOpportunityPreviews(30),
-    listActivityPreviews(30),
+  const [params, records, plays, people] = await Promise.all([
+    searchParams,
+    listExplorerData(),
+    listPlayDefinitions(),
+    listPeople(),
   ])
 
   return (
     <ExplorerView
-      view={parseExplorerView(params.view)}
-      opportunities={opportunities}
-      activities={activities}
+      initialFilters={parseExplorerFilters(params)}
+      opportunities={records.opportunities}
+      activities={records.activities}
+      plays={plays.map((play) => ({ id: play.id, name: play.name }))}
+      seNames={people.filter((person) => person.role === "se").map((person) => person.name)}
     />
   )
 }

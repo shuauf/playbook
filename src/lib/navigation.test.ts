@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest"
 
-import { parseExplorerView, parseHealthFilters } from "@/lib/navigation"
+import {
+  explorerQuery,
+  parseExplorerFilters,
+  parseExplorerView,
+  parseHealthFilters,
+} from "@/lib/navigation"
 
 describe("navigation parsers", () => {
   it("defaults Health filters to the last 90 days", () => {
@@ -35,5 +40,30 @@ describe("navigation parsers", () => {
     expect(parseExplorerView(undefined)).toBe("opportunities")
     expect(parseExplorerView("activities")).toBe("activities")
     expect(parseExplorerView("nope")).toBe("opportunities")
+  })
+
+  it("parses explorer search and omits default query params", () => {
+    expect(parseExplorerFilters({ view: "activities", q: "northwind", capture: "undefined" })).toEqual({
+      view: "activities",
+      q: "northwind",
+      outcome: "all",
+      team: "all",
+      se: "all",
+      playId: "all",
+      stage: "all",
+      capture: "undefined",
+    })
+    expect(
+      explorerQuery({
+        view: "opportunities",
+        q: "  maya  ",
+        outcome: "all",
+        team: "all",
+        se: "all",
+        playId: "all",
+        stage: "all",
+        capture: "all",
+      })
+    ).toBe("q=maya")
   })
 })
