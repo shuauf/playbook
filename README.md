@@ -25,9 +25,11 @@ Local SQLite lives at `data/playbook.sqlite` (gitignored). A fresh database appl
 
 ## Deploy on Vercel
 
-This repository deploys from the existing GitHub-to-Vercel connection. Vercel’s function filesystem is read-only except `/tmp`.
+This repository deploys from the existing GitHub-to-Vercel connection. `vercel.json` sets the framework to Next.js. The Vercel project was originally connected to an empty repo, which made Vercel look for a static `public` output directory after `next build`. Next.js does not write that folder; it emits `.next` and is deployed by the Next.js runtime.
 
-On Vercel the app uses `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` over HTTP (`libsql://` is converted to `https://`). File SQLite under `/tmp` is only the fallback when those variables are missing; that store is per-instance and not durable.
+If a dashboard **Output Directory** override is still set to `public`, turn the override off so the Next.js preset can choose the output.
+
+Vercel’s function filesystem is read-only except `/tmp`. On Vercel the app uses `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` over HTTP (`libsql://` is converted to `https://`). File SQLite under `/tmp` is only the fallback when those variables are missing; that store is per-instance and not durable.
 
 Never commit environment variable values. The application reads them only through the existing environment configuration.
 
