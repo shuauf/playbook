@@ -41,10 +41,9 @@ export function AdminView({
         </div>
       </div>
 
-      <ComingPanel title="Play editor and versioning">
-        Creating, editing, retiring, reordering prerequisites, and reviewing version history are
-        the next Admin phase. These rows already open a definition page so you can inspect the
-        current catalog.
+      <ComingPanel title="CSV import">
+        Bulk play upload will use the same versioning rules as this editor. Import lands in a
+        later phase.
       </ComingPanel>
 
       <Card>

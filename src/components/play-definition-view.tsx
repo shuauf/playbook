@@ -99,12 +99,7 @@ export function PlayDefinitionView({
           Play-level win rate, cycle time, sample sizes, and the prerequisite-by-prerequisite
           breakdown will appear here after the analysis engine exists.
         </ComingPanel>
-      ) : (
-        <ComingPanel title="Edit this play">
-          The editor will let you change the description, typical stages, and prerequisite order.
-          Saving will mint version { (play.currentVersion?.version ?? 0) + 1 }.
-        </ComingPanel>
-      )}
+      ) : null}
     </div>
   )
 }

@@ -62,4 +62,5 @@ The seed is small, coherent, and replaceable. It plants:
 | --- | --- | --- |
 | 1 | Domain model, migrations, development data | Done |
 | 2 | Navigation and application shell | In progress |
-| 3–12 | Admin versioning, Explorer, analytics, Health, AI, polish | Not started |
+| 3 | Admin Console and play versioning | In progress |
+| 4–12 | Explorer, analytics, Health, AI, polish | Not started |
