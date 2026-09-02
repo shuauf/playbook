@@ -145,11 +145,19 @@ export async function listOpportunityPreviews(limit = 25, inputDb?: PlaybookDb) 
 
 export async function listActivityPreviews(limit = 25, inputDb?: PlaybookDb) {
   const db = await resolveDb(inputDb)
-  const rows = await db
+  const recent = await db
     .select()
     .from(salesActivities)
     .orderBy(desc(salesActivities.activityDate))
     .limit(limit)
+  const undefinedRows = await db
+    .select()
+    .from(salesActivities)
+    .where(eq(salesActivities.captureKind, "undefined"))
+    .orderBy(desc(salesActivities.activityDate))
+    .limit(8)
+  const seen = new Set(recent.map((row) => row.id))
+  const rows = [...undefinedRows.filter((row) => !seen.has(row.id)), ...recent]
   const versions = await db.select().from(salesPlayVersions)
   const opps = await db.select().from(opportunities)
   return rows.map((row) => {
