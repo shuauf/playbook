@@ -5,65 +5,25 @@ import path from "node:path"
 import type { Client } from "@libsql/client"
 import { drizzle } from "drizzle-orm/libsql"
 
+import {
+  resolveDbConnection,
+  toRemoteLibsqlUrl,
+  type DbConnection,
+} from "@/lib/db/connection"
 import { applyForwardMigrations } from "@/lib/db/migrate"
 import { schema } from "@/lib/db/schema"
 import { bootstrapWorkspace } from "@/lib/db/seed"
 import type { PlaybookDb } from "@/lib/db/types"
 
 export type { PlaybookDb } from "@/lib/db/types"
-
-function env(name: string) {
-  const value = process.env[name]
-  return value && value.length > 0 ? value : undefined
-}
-
-export function isReadOnlyDeployFs() {
-  return Boolean(
-    process.env.VERCEL ||
-      process.env.AWS_LAMBDA_FUNCTION_NAME ||
-      process.env.NETLIFY ||
-      process.env.LAMBDA_TASK_ROOT
-  )
-}
-
-export type DbConnection =
-  | { kind: "file"; path: string }
-  | { kind: "remote"; url: string; authToken?: string }
-
-export function defaultDbPath() {
-  const explicit = env("PLAYBOOK_DB_PATH")
-  if (explicit) return explicit
-  if (isReadOnlyDeployFs()) {
-    return path.join(os.tmpdir(), "playbook.sqlite")
-  }
-  return path.join(process.cwd(), "data", "playbook.sqlite")
-}
-
-export function resolveDbConnection(): DbConnection {
-  const url = env("PLAYBOOK_DB_URL") ?? env("TURSO_DATABASE_URL") ?? env("LIBSQL_URL")
-  if (url && !url.startsWith("file:")) {
-    return {
-      kind: "remote",
-      url,
-      authToken:
-        env("PLAYBOOK_DB_AUTH_TOKEN") ?? env("TURSO_AUTH_TOKEN") ?? env("LIBSQL_AUTH_TOKEN"),
-    }
-  }
-  return {
-    kind: "file",
-    path: url?.startsWith("file:") ? url.slice("file:".length) : defaultDbPath(),
-  }
-}
-
-export function toRemoteLibsqlUrl(url: string) {
-  return url.startsWith("libsql://") ? `https://${url.slice("libsql://".length)}` : url
-}
-
-export function persistenceCaption(connection: DbConnection = resolveDbConnection()) {
-  if (connection.kind === "remote") return "Shared Turso database"
-  if (process.env.VERCEL) return "Demo dataset on this instance"
-  return "Local SQLite"
-}
+export {
+  defaultDbPath,
+  isReadOnlyDeployFs,
+  persistenceCaption,
+  resolveDbConnection,
+  toRemoteLibsqlUrl,
+  type DbConnection,
+} from "@/lib/db/connection"
 
 export function ensureWritableSqlitePath(filePath: string) {
   const dir = path.dirname(filePath)
@@ -71,7 +31,10 @@ export function ensureWritableSqlitePath(filePath: string) {
     fs.mkdirSync(dir, { recursive: true })
     return filePath
   } catch {
-    const fallback = path.join(os.tmpdir(), path.basename(filePath) || "playbook.sqlite")
+    const fallback = path.join(
+      /*turbopackIgnore: true*/ os.tmpdir(),
+      path.basename(filePath) || "playbook.sqlite"
+    )
     fs.mkdirSync(path.dirname(fallback), { recursive: true })
     return fallback
   }

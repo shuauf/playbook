@@ -26,7 +26,7 @@ export const MANUAL_INGESTION_SOURCE: IngestionSource = {
 }
 
 export const CSV_INGESTION_SOURCE: IngestionSource = {
-  kind: "csv",
+  kind: "import",
   label: "CSV import",
   isDemo: false,
 }

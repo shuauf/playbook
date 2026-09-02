@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { Geist, Geist_Mono, Source_Serif_4 } from "next/font/google"
 
-import { persistenceCaption } from "@/lib/db"
+import { persistenceCaption } from "@/lib/db/connection"
 
 import "./globals.css"
 

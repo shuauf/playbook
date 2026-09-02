@@ -1,7 +1,8 @@
 import { count, eq } from "drizzle-orm"
 
 import { detectPredecessorTables } from "@/lib/db/legacy"
-import { getOpenedConnection, persistenceCaption, resolveDbConnection } from "@/lib/db"
+import { persistenceCaption, resolveDbConnection } from "@/lib/db/connection"
+import { getOpenedConnection } from "@/lib/db"
 import { CURRENT_SCHEMA_VERSION } from "@/lib/db/migrate"
 import {
   activityPrerequisiteSnapshots,
