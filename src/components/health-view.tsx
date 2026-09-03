@@ -1,145 +1,194 @@
 import Link from "next/link"
 
-import { ComingPanel } from "@/components/coming-panel"
-import { HealthFilters } from "@/components/health-filters"
-import { PageIntro } from "@/components/page-intro"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { ConfidenceBadge } from "@/components/confidence-badge"
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { formatCount } from "@/lib/format"
-import type { HealthFilters as HealthFilterValues } from "@/lib/navigation"
-import type { WorkspaceStatus } from "@/lib/workspace/status"
+  CycleDivergingBars,
+  ExceptionBubbleChart,
+  WinRateDumbbell,
+} from "@/components/health-charts"
+import { HealthFiltersBar } from "@/components/health-filters"
+import { PlayPerformanceTable } from "@/components/health-table"
+import { MetricTip } from "@/components/metric-tip"
+import { Badge } from "@/components/ui/badge"
+import { formatCount, formatDays, pct } from "@/lib/format"
+import type { HealthAnalysis } from "@/lib/analysis/types"
+import { cn } from "@/lib/utils"
+
+const ACTION_LABEL = {
+  enforce: "Enforce",
+  revisit: "Revisit",
+  investigate: "Investigate",
+  define: "Define",
+  monitor: "Monitor",
+} as const
 
 export function HealthView({
-  status,
-  filters,
+  analysis,
+  plays,
   seNames,
 }: {
-  status: WorkspaceStatus
-  filters: HealthFilterValues
+  analysis: HealthAnalysis
+  plays: Array<{ id: string; name: string }>
   seNames: string[]
 }) {
-  const openUndefined = status.undefinedLabels.filter((item) => item.status === "open")
-
   return (
-    <div className="space-y-6">
-      <PageIntro kicker="Playbook Health" title="What deserves attention">
-        This is the leadership landing page. Portfolio comparisons and the grounded brief still
-        need the analysis engine. The counts, attention items, and play catalog below are live
-        workspace data.
-      </PageIntro>
-
-      <HealthFilters
-        filters={filters}
-        plays={status.plays.map((play) => ({ id: play.id, name: play.name }))}
-        seNames={seNames}
-      />
-      <p className="text-xs text-muted-foreground">
-        Filters are remembered in the URL. They will drive metrics, the attention queue, and the
-        AI brief once those surfaces exist.
-      </p>
-
-      <ComingPanel title="AI Playbook Brief">
-        A short, evidence-backed brief will sit here. It will only summarize findings the
-        application has already computed. It will not invent metrics, and it will not be a
-        chatbot.
-      </ComingPanel>
-
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        {[
-          { label: "Opportunities analyzed", value: status.counts.opportunities },
-          { label: "Sales activities logged", value: status.counts.activities },
-          { label: "Undefined activities", value: status.counts.undefinedActivities },
-          { label: "Play definitions", value: status.counts.plays },
-        ].map((metric) => (
-          <Card key={metric.label} size="sm">
-            <CardHeader>
-              <CardDescription>{metric.label}</CardDescription>
-              <CardTitle className="font-heading text-3xl">{formatCount(metric.value)}</CardTitle>
-            </CardHeader>
-          </Card>
-        ))}
+    <div className="space-y-5">
+      <div>
+        <p className="text-[11px] font-medium tracking-[0.16em] text-[oklch(0.42_0.06_175)] uppercase">
+          Playbook Health
+        </p>
+        <h1 className="font-heading mt-1 text-3xl leading-tight text-foreground md:text-[2rem]">
+          Where the playbook needs attention
+        </h1>
+        <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+          Compare playbook adherence with deal outcomes. Exceptions are associations, not proof of
+          cause.
+        </p>
       </div>
 
-      <Card>
-        <CardHeader className="border-b">
-          <CardTitle>Attention queue</CardTitle>
-          <CardDescription>
-            Issues a leader can act on now. Outcome-linked alerts arrive with the analysis
-            engine.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="divide-y">
-          {openUndefined.length === 0 ? (
-            <p className="py-4 text-sm text-muted-foreground">No undefined plays need attention.</p>
+      <HealthFiltersBar filters={analysis.filters} plays={plays} seNames={seNames} />
+
+      <section className="rounded-xl bg-card px-4 py-3 ring-1 ring-foreground/10">
+        <p className="text-[11px] font-medium tracking-[0.14em] text-muted-foreground uppercase">
+          Playbook pulse
+        </p>
+        <p className="font-heading mt-1 text-xl leading-snug">{analysis.pulse}</p>
+      </section>
+
+      <section className="grid grid-cols-2 gap-2 xl:grid-cols-5">
+        {analysis.metrics.map((metric) => (
+          <Link
+            key={metric.id}
+            href={metric.href}
+            className="rounded-lg bg-card px-3 py-2 ring-1 ring-foreground/10 hover:ring-foreground/20"
+          >
+            <div className="flex items-center text-[11px] text-muted-foreground">
+              {metric.label}
+              <MetricTip label={metric.label}>{metric.definition}</MetricTip>
+            </div>
+            <p className="mt-1 text-xl font-medium tracking-tight">{metric.value}</p>
+            {metric.prior ? (
+              <p className="text-[11px] text-muted-foreground">vs prior {metric.prior}</p>
+            ) : (
+              <p className="text-[11px] text-muted-foreground">No prior period</p>
+            )}
+          </Link>
+        ))}
+      </section>
+
+      <section className="grid gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(20rem,0.9fr)]">
+        <div className="rounded-xl bg-card p-4 ring-1 ring-foreground/10">
+          <h2 className="font-heading text-xl">Where exceptions deserve attention</h2>
+          <p className="mb-2 text-xs text-muted-foreground">
+            Bubble size is distinct opportunities. Color is sample confidence. Click a play to open
+            its definition.
+          </p>
+          <ExceptionBubbleChart plays={analysis.plays} />
+        </div>
+        <div className="rounded-xl bg-card p-4 ring-1 ring-foreground/10">
+          <h2 className="font-heading text-xl">What needs action</h2>
+          <div className="mt-3 divide-y">
+            {analysis.actions.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No action-ready patterns in this filter set.
+              </p>
+            ) : (
+              analysis.actions.map((item) => (
+                <div key={item.id} className="py-3 first:pt-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge variant="outline">{ACTION_LABEL[item.classification]}</Badge>
+                    <ConfidenceBadge level={item.confidence} />
+                  </div>
+                  <Link href={item.href} className="mt-1 block font-medium hover:underline">
+                    {item.subject}
+                  </Link>
+                  <p className="mt-1 text-sm text-muted-foreground">{item.evidence}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">n={formatCount(item.sampleSize)}</p>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section className="grid gap-4 lg:grid-cols-2">
+        <div className="rounded-xl bg-card p-4 ring-1 ring-foreground/10">
+          <h2 className="font-heading text-xl">Win rate when the playbook is followed</h2>
+          <p className="mb-3 text-xs text-muted-foreground">
+            Closed opportunities only. Hollow marks mean the sample is insufficient.
+          </p>
+          <WinRateDumbbell plays={analysis.plays} />
+        </div>
+        <div className="rounded-xl bg-card p-4 ring-1 ring-foreground/10">
+          <h2 className="font-heading text-xl">Cycle-time difference when exceptions occur</h2>
+          <p className="mb-3 text-xs text-muted-foreground">
+            Median days among won opportunities. Right is slower; left is faster.
+          </p>
+          <CycleDivergingBars plays={analysis.plays} />
+        </div>
+      </section>
+
+      {analysis.stackingUseful ? (
+        <section className="rounded-xl bg-card p-4 ring-1 ring-foreground/10">
+          <h2 className="font-heading text-xl">What happens as exceptions accumulate</h2>
+          <p className="mb-3 text-xs text-muted-foreground">
+            Unique opportunity × play pairs. Language here is association, not cause.
+          </p>
+          <div className="grid gap-3 md:grid-cols-3">
+            {analysis.stacking.map((bucket) => (
+              <div key={bucket.key} className="rounded-lg bg-muted/50 px-3 py-3">
+                <p className="text-sm font-medium">{bucket.label}</p>
+                <p className="mt-2 text-2xl font-medium">
+                  {bucket.winRate === null ? "—" : pct(bucket.winRate)}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  closed win rate · {formatCount(bucket.closedCount)} opportunities
+                </p>
+                <p className="mt-2 text-sm">
+                  {formatDays(bucket.medianCycleDays)} median among {formatCount(bucket.wonCount)} wins
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      <section className="rounded-xl bg-card ring-1 ring-foreground/10">
+        <div className="px-4 pt-4">
+          <h2 className="font-heading text-xl">Sales play performance</h2>
+        </div>
+        <div className="mt-2 overflow-x-auto">
+          <PlayPerformanceTable plays={analysis.plays} />
+        </div>
+      </section>
+
+      <section className="rounded-xl bg-card p-4 ring-1 ring-foreground/10">
+        <h2 className="font-heading text-xl">Playbook hygiene</h2>
+        <div className="mt-3 divide-y">
+          {analysis.hygiene.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No operational hygiene issues in this view.</p>
           ) : (
-            openUndefined.map((item) => (
-              <div key={item.displayName} className="flex items-start justify-between gap-4 py-3">
+            analysis.hygiene.map((issue) => (
+              <div key={issue.id} className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p className="font-medium">{item.displayName}</p>
+                  <p className="font-medium">{issue.name}</p>
                   <p className="text-sm text-muted-foreground">
-                    {formatCount(status.counts.undefinedActivities)} activities are not mapped to a
-                    formal sales play.
+                    {formatCount(issue.activityCount)} activities ·{" "}
+                    {formatCount(issue.opportunityCount)} opportunities
+                    {issue.firstAt && issue.lastAt ? ` · ${issue.firstAt}–${issue.lastAt}` : ""}
                   </p>
                 </div>
                 <Link
-                  href="/admin/undefined"
-                  className="text-sm text-[oklch(0.32_0.06_175)] hover:underline"
+                  href={issue.href}
+                  className={cn("text-sm text-[oklch(0.32_0.06_175)] hover:underline")}
                 >
-                  Review
+                  {issue.action}
                 </Link>
               </div>
             ))
           )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="border-b">
-          <CardTitle>Play performance</CardTitle>
-          <CardDescription>
-            Volume is from the workspace. Exception rate, win rate, and cycle comparisons will
-            fill these columns later. Click a play to inspect its definition.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="px-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Sales play</TableHead>
-                <TableHead>Typical stages</TableHead>
-                <TableHead>Prerequisites</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {status.plays.map((play) => (
-                <TableRow key={play.id}>
-                  <TableCell>
-                    <Link href={`/plays/${play.id}`} className="font-medium hover:underline">
-                      {play.name}
-                    </Link>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {play.typicalStages.join(", ") || "—"}
-                  </TableCell>
-                  <TableCell>{play.prerequisiteCount}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{play.status}</Badge>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
     </div>
   )
 }

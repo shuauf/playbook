@@ -4,9 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 export default function MethodologyPage() {
   return (
     <div className="space-y-6">
-      <PageIntro kicker="Methodology" title="How this product will judge evidence">
-        Definitions are fixed now so later analysis can stay interviewable. The engine that
-        applies them is not built yet.
+      <PageIntro kicker="Methodology" title="How this product judges evidence">
+        Playbook Health applies these rules deterministically. It does not infer causes, and it
+        does not ask a model to invent findings.
       </PageIntro>
       <Card>
         <CardHeader>

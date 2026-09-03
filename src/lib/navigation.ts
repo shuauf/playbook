@@ -36,6 +36,18 @@ export const DEFAULT_HEALTH_FILTERS: HealthFilters = {
   outcome: "all",
 }
 
+export function healthQuery(filters: HealthFilters) {
+  const params = new URLSearchParams()
+  if (filters.period !== "90") params.set("period", filters.period)
+  if (filters.playId !== "all") params.set("playId", filters.playId)
+  if (filters.stage !== "all") params.set("stage", filters.stage)
+  if (filters.segment !== "all") params.set("segment", filters.segment)
+  if (filters.team !== "all") params.set("team", filters.team)
+  if (filters.se !== "all") params.set("se", filters.se)
+  if (filters.outcome !== "all") params.set("outcome", filters.outcome)
+  return params.toString()
+}
+
 export function parseHealthFilters(
   input: Record<string, string | string[] | undefined>
 ): HealthFilters {
