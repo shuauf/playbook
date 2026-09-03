@@ -23,7 +23,7 @@ import type { PlaybookDb } from "@/lib/db/types"
 import { undefinedLabelKey } from "@/lib/domain/labels"
 import type { OpportunityOutcome, PipelineStage, PrerequisiteStatus } from "@/lib/domain/types"
 
-export const SEED_VERSION = "northstar-v2"
+export const SEED_VERSION = "northstar-v3"
 export const SEED_AS_OF = new Date(2026, 8, 3)
 const DEMO_SOURCE = "demo"
 
@@ -97,10 +97,10 @@ function playById(id: string) {
   return play
 }
 
-function windowFor(index: number, total: number): WindowKind {
-  const ratio = index / Math.max(total, 1)
-  if (ratio < 0.68) return "current"
-  if (ratio < 0.93) return "prior"
+function windowFor(index: number, _total?: number): WindowKind {
+  const stripe = index % 20
+  if (stripe < 14) return "current"
+  if (stripe < 19) return "prior"
   return "older"
 }
 

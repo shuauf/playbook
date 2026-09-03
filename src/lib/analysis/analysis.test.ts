@@ -128,6 +128,10 @@ describe("analysis engine", () => {
     expect(current.metrics.every((item) => item.value.length > 0)).toBe(true)
     expect(current.totals.activities).toBeGreaterThan(200)
     expect(current.totals.closedOpportunities).toBeGreaterThan(150)
+    const demo = current.plays.find((item) => item.playId === "play-product-demo")
+    expect(demo?.win.confidence).toBe("supported")
+    expect(demo?.win.difference).toBeGreaterThan(0.08)
+    expect(current.actions.some((item) => item.classification === "enforce")).toBe(true)
   })
 
   it("ranks deterministic actions from the planted story", () => {
