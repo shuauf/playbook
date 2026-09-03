@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import {
   explorerQuery,
+  healthQuery,
   parseExplorerFilters,
   parseExplorerView,
   parseHealthFilters,
@@ -34,6 +35,9 @@ describe("navigation parsers", () => {
       outcome: "won",
     })
     expect(parseHealthFilters({ period: "tomorrow" }).period).toBe("90")
+    expect(healthQuery({ ...parseHealthFilters({}), period: "180", playId: "play-workshop" })).toBe(
+      "period=180&playId=play-workshop"
+    )
   })
 
   it("defaults the explorer to opportunities", () => {

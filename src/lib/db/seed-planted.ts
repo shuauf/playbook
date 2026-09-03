@@ -1,7 +1,10 @@
 import { addDays } from "@/lib/dates"
 import {
+  DEMO_ACCOUNTS,
+  DEMO_DEAL_SHAPES,
   DEMO_PEOPLE,
   DEMO_PLAYS,
+  UNDEFINED_BRIEFING_LABEL,
   UNDEFINED_SECURITY_LABEL,
   type DemoPlay,
 } from "@/lib/db/catalog"
@@ -20,34 +23,41 @@ import type { PlaybookDb } from "@/lib/db/types"
 import { undefinedLabelKey } from "@/lib/domain/labels"
 import type { OpportunityOutcome, PipelineStage, PrerequisiteStatus } from "@/lib/domain/types"
 
-const BASE = new Date(2026, 0, 12)
+export const SEED_VERSION = "northstar-v3"
+export const SEED_AS_OF = new Date(2026, 8, 3)
 const DEMO_SOURCE = "demo"
 
 export const SEED_CONTRACT = {
+  version: SEED_VERSION,
   playCount: 5,
-  personCount: 6,
+  personCount: DEMO_PEOPLE.length,
+  minOpportunities: 800,
+  minActivities: 1200,
   enforcePlayId: "play-product-demo",
   enforcePrerequisiteKey: "demo-problem",
-  enforceMetClosed: 65,
-  enforceUnmetClosed: 45,
+  enforceMetClosed: 220,
+  enforceUnmetClosed: 160,
+  enforceMetWon: 143,
+  enforceUnmetWon: 64,
   revisitPrerequisiteKey: "demo-champion",
-  revisitMetClosed: 68,
-  revisitUnmetClosed: 42,
-  productDemoOpen: 12,
-  repeatedOpportunityCount: 12,
-  stackedUnmetOnSameActivity: 8,
+  productDemoOpen: 140,
+  repeatedOpportunityCount: 60,
+  stackedUnmetOnSameActivity: 40,
   investigatePlayId: "play-workshop",
-  investigateClosed: 10,
-  discoveryClosed: 20,
-  discoveryOpen: 4,
-  offStageDiscoveryCount: 6,
-  architectureClosed: 16,
-  pocClosed: 16,
+  investigateClosed: 12,
+  discoveryClosed: 160,
+  discoveryOpen: 36,
+  offStageDiscoveryCount: 42,
+  architectureClosed: 140,
+  pocClosed: 90,
   undefinedLabel: UNDEFINED_SECURITY_LABEL,
-  undefinedActivityCount: 18,
+  undefinedActivityCount: 110,
+  briefingLabel: UNDEFINED_BRIEFING_LABEL,
+  briefingActivityCount: 8,
 } as const
 
 type CheckMap = Record<string, PrerequisiteStatus>
+type WindowKind = "current" | "prior" | "older"
 
 type PlannedOpportunity = {
   id: string
@@ -78,35 +88,8 @@ type PlannedActivity = {
   checks: CheckMap
 }
 
-const ACCOUNTS = [
-  "Harborline",
-  "Northwind Health",
-  "Cedar Analytics",
-  "Brightfield",
-  "Summit Ledger",
-  "Kite & Co",
-  "Riverstone",
-  "Aperture Labs",
-  "Fieldwork",
-  "Orchard Systems",
-]
-
-function pair(index: number) {
-  const se = DEMO_PEOPLE.filter((person) => person.role === "se")[index % 3]!
-  const ae = DEMO_PEOPLE.filter((person) => person.role === "ae")[index % 3]!
-  const segments = ["SMB", "Mid-market", "Enterprise"] as const
-  return {
-    seName: se.name,
-    aeName: ae.name,
-    team: se.team,
-    segment: segments[index % 3]!,
-    account: `${ACCOUNTS[index % ACCOUNTS.length]} ${Math.floor(index / ACCOUNTS.length) + 1}`,
-  }
-}
-
-function at(days: number) {
-  return addDays(BASE, days)
-}
+const SES = DEMO_PEOPLE.filter((person) => person.role === "se")
+const AES = DEMO_PEOPLE.filter((person) => person.role === "ae")
 
 function playById(id: string) {
   const play = DEMO_PLAYS.find((item) => item.id === id)
@@ -114,36 +97,65 @@ function playById(id: string) {
   return play
 }
 
-function opportunity(input: {
+function windowFor(index: number, _total?: number): WindowKind {
+  const stripe = index % 20
+  if (stripe < 14) return "current"
+  if (stripe < 19) return "prior"
+  return "older"
+}
+
+function createdDaysAgo(kind: WindowKind, salt: number) {
+  if (kind === "current") return 18 + (salt % 70)
+  if (kind === "prior") return 100 + (salt % 70)
+  return 210 + (salt % 140)
+}
+
+function identity(index: number) {
+  const se = SES[index % SES.length]!
+  const ae = AES[index % AES.length]!
+  const segments = ["SMB", "Mid-market", "Enterprise"] as const
+  const account = DEMO_ACCOUNTS[index % DEMO_ACCOUNTS.length]!
+  const shape = DEMO_DEAL_SHAPES[index % DEMO_DEAL_SHAPES.length]!
+  return {
+    seName: se.name,
+    aeName: ae.name,
+    team: se.team,
+    segment: segments[index % 3]!,
+    account,
+    name: `${account} — ${shape}`,
+  }
+}
+
+function makeOpportunity(input: {
   id: string
   index: number
-  name: string
   outcome: OpportunityOutcome
-  createdOffset: number
-  cycleDays?: number
+  window: WindowKind
+  cycleDays: number
   stage: string
+  name?: string
 }): PlannedOpportunity {
-  const identity = pair(input.index)
-  const createdAt = at(input.createdOffset)
+  const who = identity(input.index)
+  const createdAt = addDays(SEED_AS_OF, -createdDaysAgo(input.window, input.index + input.id.length))
   const closeDate =
-    input.outcome === "open" ? null : addDays(createdAt, input.cycleDays ?? 62)
+    input.outcome === "open" ? null : addDays(createdAt, input.cycleDays)
   return {
     id: input.id,
     externalId: input.id.replace(/^opp-/, "ext-"),
-    name: input.name,
-    account: identity.account,
-    segment: identity.segment,
+    name: input.name ?? who.name,
+    account: who.account,
+    segment: who.segment,
     stage: input.outcome === "won" ? "Closed Won" : input.outcome === "lost" ? "Closed Lost" : input.stage,
     outcome: input.outcome,
-    seName: identity.seName,
-    aeName: identity.aeName,
-    team: identity.team,
+    seName: who.seName,
+    aeName: who.aeName,
+    team: who.team,
     createdAt,
     closeDate,
   }
 }
 
-function definedActivity(input: {
+function addActivity(input: {
   id: string
   opportunity: PlannedOpportunity
   play: DemoPlay
@@ -152,12 +164,13 @@ function definedActivity(input: {
   checks: CheckMap
   note?: string
 }): PlannedActivity {
+  const activityDate = addDays(input.opportunity.createdAt, input.dayOffset)
   return {
     id: input.id,
     externalId: input.id.replace(/^act-/, "ext-"),
     opportunityId: input.opportunity.id,
     play: input.play,
-    activityDate: addDays(input.opportunity.createdAt, input.dayOffset),
+    activityDate,
     stageAtActivity: input.stageAtActivity,
     seName: input.opportunity.seName,
     note: input.note ?? null,
@@ -166,216 +179,256 @@ function definedActivity(input: {
   }
 }
 
-function buildProductDemoCohort() {
-  const play = playById("play-product-demo")
+function closedOutcomes(won: number, lost: number) {
+  return [
+    ...Array.from({ length: won }, () => "won" as const),
+    ...Array.from({ length: lost }, () => "lost" as const),
+  ]
+}
+
+export function buildPlantedWorkspace() {
   const opps: PlannedOpportunity[] = []
   const activities: PlannedActivity[] = []
+  const demo = playById("play-product-demo")
+  const discovery = playById("play-discovery")
+  const architecture = playById("play-architecture-review")
+  const workshop = playById("play-workshop")
+  const poc = playById("play-poc")
 
-  const cohortA = [
-    ...Array.from({ length: 26 }, (_, i) => ({ outcome: "won" as const, champion: "met" as const, i })),
-    ...Array.from({ length: 14 }, (_, i) => ({ outcome: "lost" as const, champion: "met" as const, i })),
-    ...Array.from({ length: 16 }, (_, i) => ({ outcome: "won" as const, champion: "not_met" as const, i })),
-    ...Array.from({ length: 9 }, (_, i) => ({ outcome: "lost" as const, champion: "not_met" as const, i })),
-  ]
-  const cohortB = [
-    ...Array.from({ length: 6 }, (_, i) => ({ outcome: "won" as const, champion: "met" as const, i })),
-    ...Array.from({ length: 22 }, (_, i) => ({ outcome: "lost" as const, champion: "met" as const, i })),
-    ...Array.from({ length: 4 }, (_, i) => ({ outcome: "won" as const, champion: "not_met" as const, i })),
-    ...Array.from({ length: 13 }, (_, i) => ({ outcome: "lost" as const, champion: "not_met" as const, i })),
+  const metWon = SEED_CONTRACT.enforceMetWon
+  const metLost = SEED_CONTRACT.enforceMetClosed - metWon
+  const unmetWon = SEED_CONTRACT.enforceUnmetWon
+  const unmetLost = SEED_CONTRACT.enforceUnmetClosed - unmetWon
+  const demoClosed = [
+    ...closedOutcomes(metWon, metLost).map((outcome) => ({ outcome, problem: "met" as const })),
+    ...closedOutcomes(unmetWon, unmetLost).map((outcome) => ({ outcome, problem: "not_met" as const })),
   ]
 
-  cohortA.forEach((row, index) => {
-    const id = `opp-pd-a-${String(index + 1).padStart(2, "0")}`
-    const opp = opportunity({
-      id,
+  demoClosed.forEach((row, index) => {
+    const stacked = row.problem === "not_met" && index % 4 === 0 && index < demoClosed.length
+    const stackedLimit =
+      row.problem === "not_met" &&
+      demoClosed.slice(0, index + 1).filter((item) => item.problem === "not_met").length <=
+        SEED_CONTRACT.stackedUnmetOnSameActivity
+    const stackedNow = stacked && stackedLimit
+    const champion: PrerequisiteStatus = index % 5 === 0 || index % 5 === 1 ? "not_met" : "met"
+    const window = windowFor(index, demoClosed.length)
+    const cycle =
+      row.problem === "not_met" ? 78 + (index % 16) : 54 + (index % 12)
+    const opp = makeOpportunity({
+      id: `opp-pd-${String(index + 1).padStart(3, "0")}`,
       index,
-      name: `Product Demo ${row.outcome === "won" ? "won" : "lost"} A${index + 1}`,
       outcome: row.outcome,
-      createdOffset: 4 + index * 2,
-      cycleDays: 58 + (index % 12),
+      window,
+      cycleDays: cycle,
       stage: "Evaluate",
     })
     opps.push(opp)
     activities.push(
-      definedActivity({
-        id: `act-${id}`,
+      addActivity({
+        id: `act-${opp.id}`,
         opportunity: opp,
-        play,
-        dayOffset: 16 + (index % 8),
+        play: demo,
+        dayOffset: 12 + (index % 6),
         stageAtActivity: "Evaluate",
         checks: {
-          "demo-discovery": "met",
-          "demo-problem": "met",
-          "demo-champion": row.champion,
+          "demo-discovery": stackedNow ? "not_met" : "met",
+          "demo-problem": row.problem,
+          "demo-champion": champion,
         },
+        note: stackedNow ? "Discovery and confirmed problem both skipped." : undefined,
       })
     )
-  })
-
-  cohortB.forEach((row, index) => {
-    const id = `opp-pd-b-${String(index + 1).padStart(2, "0")}`
-    const stackedDiscovery = index < SEED_CONTRACT.stackedUnmetOnSameActivity
-    const opp = opportunity({
-      id,
-      index: index + 80,
-      name: `Product Demo ${row.outcome === "won" ? "won" : "lost"} B${index + 1}`,
-      outcome: row.outcome,
-      createdOffset: 8 + index * 2,
-      cycleDays: 70 + (index % 14),
-      stage: "Evaluate",
-    })
-    opps.push(opp)
-    activities.push(
-      definedActivity({
-        id: `act-${id}`,
-        opportunity: opp,
-        play,
-        dayOffset: 18 + (index % 6),
-        stageAtActivity: "Evaluate",
-        checks: {
-          "demo-discovery": stackedDiscovery ? "not_met" : "met",
-          "demo-problem": "not_met",
-          "demo-champion": row.champion,
-        },
-        note: stackedDiscovery ? "Stacked exception: discovery and problem both skipped." : undefined,
-      })
-    )
+    if (index % 5 !== 0) {
+      activities.push(
+        addActivity({
+          id: `act-${opp.id}-disc`,
+          opportunity: opp,
+          play: discovery,
+          dayOffset: 6,
+          stageAtActivity: index % 17 === 0 ? "Validate" : "Qualify",
+          checks: { "discovery-aligned": index % 11 === 0 ? "not_met" : "met" },
+        })
+      )
+    }
+    if (row.outcome === "won" && index % 3 === 0) {
+      activities.push(
+        addActivity({
+          id: `act-${opp.id}-arch`,
+          opportunity: opp,
+          play: architecture,
+          dayOffset: 28,
+          stageAtActivity: "Validate",
+          checks: { "arch-risks": index % 7 === 0 ? "not_met" : "met" },
+        })
+      )
+    }
+    if (row.outcome === "won" && index % 6 === 0) {
+      activities.push(
+        addActivity({
+          id: `act-${opp.id}-poc`,
+          opportunity: opp,
+          play: poc,
+          dayOffset: 40,
+          stageAtActivity: "Prove",
+          checks: { "poc-criteria": "met" },
+        })
+      )
+    }
   })
 
   for (let index = 0; index < SEED_CONTRACT.productDemoOpen; index++) {
-    const id = `opp-pd-open-${String(index + 1).padStart(2, "0")}`
-    const opp = opportunity({
-      id,
-      index: index + 160,
-      name: `Open Product Demo ${index + 1}`,
+    const opp = makeOpportunity({
+      id: `opp-pd-open-${String(index + 1).padStart(3, "0")}`,
+      index: 900 + index,
       outcome: "open",
-      createdOffset: 140 + index * 3,
+      window: "current",
+      cycleDays: 0,
       stage: "Evaluate",
     })
     opps.push(opp)
     activities.push(
-      definedActivity({
-        id: `act-${id}`,
+      addActivity({
+        id: `act-${opp.id}`,
         opportunity: opp,
-        play,
-        dayOffset: 12,
+        play: demo,
+        dayOffset: 9,
         stageAtActivity: "Evaluate",
         checks: {
           "demo-discovery": "met",
-          "demo-problem": index % 3 === 0 ? "not_met" : "met",
+          "demo-problem": index % 4 === 0 ? "not_met" : "met",
           "demo-champion": index % 2 === 0 ? "met" : "not_met",
         },
       })
     )
   }
 
-  const repeatTargets = [
-    ...opps.filter((item) => item.id.startsWith("opp-pd-a-")).slice(0, 8),
-    ...opps.filter((item) => item.id.startsWith("opp-pd-b-")).slice(0, 4),
-  ]
-  repeatTargets.forEach((opp, index) => {
-    const first = activities.find((item) => item.opportunityId === opp.id)
-    if (!first) return
+  const repeatTargets = opps.filter((item) => item.id.startsWith("opp-pd-")).slice(0, SEED_CONTRACT.repeatedOpportunityCount)
+  repeatTargets.forEach((opp) => {
+    const first = activities.find((item) => item.id === `act-${opp.id}`)
+    if (!first || !first.play) return
     activities.push(
-      definedActivity({
+      addActivity({
         id: `act-${opp.id}-repeat`,
         opportunity: opp,
-        play,
-        dayOffset: 28,
+        play: first.play,
+        dayOffset: 24,
         stageAtActivity: "Evaluate",
         checks: first.checks,
         note: "Second Product Demo on the same opportunity. Outcome is counted once.",
       })
     )
-    void index
   })
 
-  return { opps, activities }
-}
+  function simpleCohort(input: {
+    play: DemoPlay
+    prefix: string
+    closed: number
+    won: number
+    open?: number
+    stage: PipelineStage
+    cycle: number
+    unmet: number
+    startIndex: number
+    offStage?: { count: number; stage: PipelineStage }
+  }) {
+    const total = input.closed + (input.open ?? 0)
+    for (let index = 0; index < total; index++) {
+      const outcome: OpportunityOutcome =
+        index < input.won ? "won" : index < input.closed ? "lost" : "open"
+      const window = outcome === "open" ? "current" : windowFor(index, input.closed)
+      const opp = makeOpportunity({
+        id: `opp-${input.prefix}-${String(index + 1).padStart(3, "0")}`,
+        index: input.startIndex + index,
+        outcome,
+        window,
+        cycleDays: input.cycle + (index % 9),
+        stage: input.stage,
+      })
+      opps.push(opp)
+      const unmet = index >= input.closed - input.unmet && index < input.closed
+      const offStage = index < (input.offStage?.count ?? 0)
+      activities.push(
+        addActivity({
+          id: `act-${opp.id}`,
+          opportunity: opp,
+          play: input.play,
+          dayOffset: offStage ? 30 : 11,
+          stageAtActivity: offStage ? input.offStage!.stage : input.stage,
+          checks: { [input.play.prerequisites[0]!.key]: unmet ? "not_met" : "met" },
+          note: offStage ? "Used outside the play’s typical stage." : undefined,
+        })
+      )
+    }
+  }
 
-function buildSimplePlay(input: {
-  playId: string
-  prefix: string
-  closed: number
-  won: number
-  open?: number
-  stage: PipelineStage
-  createdBase: number
-  cycleDays: number
-  unmetCount: number
-  offStageCount?: number
-  offStage?: PipelineStage
-}) {
-  const play = playById(input.playId)
-  const prereq = play.prerequisites[0]
-  if (!prereq) throw new Error(`${play.name} needs a prerequisite`)
-  const opps: PlannedOpportunity[] = []
-  const activities: PlannedActivity[] = []
-  const totalClosed = input.closed
-  const openCount = input.open ?? 0
+  simpleCohort({
+    play: workshop,
+    prefix: "ws",
+    closed: 12,
+    won: 4,
+    stage: "Evaluate",
+    cycle: 46,
+    unmet: 6,
+    startIndex: 1600,
+  })
+  simpleCohort({
+    play: discovery,
+    prefix: "disc",
+    closed: 80,
+    won: 46,
+    open: 36,
+    stage: "Qualify",
+    cycle: 86,
+    unmet: 18,
+    startIndex: 1800,
+    offStage: { count: 24, stage: "Validate" },
+  })
+  simpleCohort({
+    play: architecture,
+    prefix: "arch",
+    closed: 70,
+    won: 40,
+    stage: "Validate",
+    cycle: 41,
+    unmet: 22,
+    startIndex: 2100,
+  })
+  simpleCohort({
+    play: poc,
+    prefix: "poc",
+    closed: 40,
+    won: 31,
+    open: 12,
+    stage: "Prove",
+    cycle: 22,
+    unmet: 6,
+    startIndex: 2300,
+  })
 
-  for (let index = 0; index < totalClosed + openCount; index++) {
-    const outcome: OpportunityOutcome =
-      index < input.won ? "won" : index < totalClosed ? "lost" : "open"
-    const id = `opp-${input.prefix}-${String(index + 1).padStart(2, "0")}`
-    const opp = opportunity({
-      id,
-      index: input.createdBase + index,
-      name: `${play.name} ${outcome} ${index + 1}`,
-      outcome,
-      createdOffset: input.createdBase + index * 3,
-      cycleDays: input.cycleDays + (index % 7),
-      stage: input.stage,
+  const hosts = opps.filter((item) => item.outcome !== "open").slice(0, 70)
+  const extraUndef = SEED_CONTRACT.undefinedActivityCount - hosts.length
+  for (let index = 0; index < extraUndef; index++) {
+    const opp = makeOpportunity({
+      id: `opp-undef-${String(index + 1).padStart(2, "0")}`,
+      index: 2600 + index,
+      outcome: index < 12 ? "won" : index < 22 ? "lost" : "open",
+      window: windowFor(index, extraUndef),
+      cycleDays: 49,
+      stage: "Validate",
+      name: `Ad hoc security review ${index + 1}`,
     })
     opps.push(opp)
-    const unmet = index >= totalClosed - input.unmetCount && index < totalClosed
-    const offStage = index < (input.offStageCount ?? 0)
-    activities.push(
-      definedActivity({
-        id: `act-${id}`,
-        opportunity: opp,
-        play,
-        dayOffset: offStage ? 36 : 14,
-        stageAtActivity: offStage ? (input.offStage ?? "Validate") : input.stage,
-        checks: { [prereq.key]: unmet ? "not_met" : "met" },
-        note: offStage ? "Used outside the play’s typical stage." : undefined,
-      })
-    )
   }
-
-  return { opps, activities }
-}
-
-function buildUndefined(existing: PlannedOpportunity[]) {
-  const opps: PlannedOpportunity[] = []
-  const activities: PlannedActivity[] = []
-  const hosts = existing.slice(0, 10)
-  const extraCount = SEED_CONTRACT.undefinedActivityCount - hosts.length
-
-  for (let index = 0; index < extraCount; index++) {
-    const id = `opp-undef-${String(index + 1).padStart(2, "0")}`
-    opps.push(
-      opportunity({
-        id,
-        index: 240 + index,
-        name: `Ad hoc security review ${index + 1}`,
-        outcome: index < 3 ? "won" : index < 6 ? "lost" : "open",
-        createdOffset: 90 + index * 4,
-        cycleDays: 48,
-        stage: "Validate",
-      })
-    )
-  }
-
-  const targets = [...hosts, ...opps]
-  targets.forEach((opp, index) => {
+  const undefTargets = [...hosts, ...opps.filter((item) => item.id.startsWith("opp-undef-"))]
+  undefTargets.slice(0, SEED_CONTRACT.undefinedActivityCount).forEach((opp, index) => {
     activities.push({
-      id: `act-undef-${String(index + 1).padStart(2, "0")}`,
-      externalId: `ext-undef-${String(index + 1).padStart(2, "0")}`,
+      id: `act-undef-${String(index + 1).padStart(3, "0")}`,
+      externalId: `ext-undef-${String(index + 1).padStart(3, "0")}`,
       opportunityId: opp.id,
       play: null,
       undefinedLabel: UNDEFINED_SECURITY_LABEL,
-      activityDate: addDays(opp.createdAt, 22),
+      activityDate: addDays(opp.createdAt, 16),
       stageAtActivity: "Validate",
       seName: opp.seName,
       note: "Logged as an undefined activity. No prerequisite snapshot exists.",
@@ -384,75 +437,24 @@ function buildUndefined(existing: PlannedOpportunity[]) {
     })
   })
 
-  return { opps, activities }
-}
-
-export function buildPlantedWorkspace() {
-  const productDemo = buildProductDemoCohort()
-  const workshop = buildSimplePlay({
-    playId: "play-workshop",
-    prefix: "ws",
-    closed: 10,
-    won: 5,
-    stage: "Evaluate",
-    createdBase: 200,
-    cycleDays: 44,
-    unmetCount: 5,
-  })
-  const discovery = buildSimplePlay({
-    playId: "play-discovery",
-    prefix: "disc",
-    closed: 20,
-    won: 12,
-    open: 4,
-    stage: "Qualify",
-    createdBase: 20,
-    cycleDays: 88,
-    unmetCount: 4,
-    offStageCount: 6,
-    offStage: "Validate",
-  })
-  const architecture = buildSimplePlay({
-    playId: "play-architecture-review",
-    prefix: "arch",
-    closed: 16,
-    won: 9,
-    stage: "Validate",
-    createdBase: 60,
-    cycleDays: 40,
-    unmetCount: 5,
-  })
-  const poc = buildSimplePlay({
-    playId: "play-poc",
-    prefix: "poc",
-    closed: 16,
-    won: 13,
-    stage: "Prove",
-    createdBase: 110,
-    cycleDays: 24,
-    unmetCount: 2,
-  })
-
-  const baseOpps = [
-    ...productDemo.opps,
-    ...workshop.opps,
-    ...discovery.opps,
-    ...architecture.opps,
-    ...poc.opps,
-  ]
-  const undefinedPlay = buildUndefined(baseOpps)
-
-  return {
-    opportunities: [...baseOpps, ...undefinedPlay.opps],
-    activities: [
-      ...productDemo.activities,
-      ...workshop.activities,
-      ...discovery.activities,
-      ...architecture.activities,
-      ...poc.activities,
-      ...undefinedPlay.activities,
-    ],
+  for (let index = 0; index < SEED_CONTRACT.briefingActivityCount; index++) {
+    const host = opps[index * 17]!
+    activities.push({
+      id: `act-brief-${String(index + 1).padStart(2, "0")}`,
+      externalId: `ext-brief-${String(index + 1).padStart(2, "0")}`,
+      opportunityId: host.id,
+      play: null,
+      undefinedLabel: UNDEFINED_BRIEFING_LABEL,
+      activityDate: addDays(host.createdAt, 20),
+      stageAtActivity: "Propose",
+      seName: host.seName,
+      note: "Occasional executive conversation without a play definition.",
+      captureKind: "undefined",
+      checks: {},
+    })
   }
+
+  return { opportunities: opps, activities }
 }
 
 async function insertChunks<T>(
@@ -460,9 +462,21 @@ async function insertChunks<T>(
   table: Parameters<PlaybookDb["insert"]>[0],
   rows: T[]
 ) {
-  for (let index = 0; index < rows.length; index += 40) {
-    await db.insert(table).values(rows.slice(index, index + 40) as never)
+  for (let index = 0; index < rows.length; index += 80) {
+    await db.insert(table).values(rows.slice(index, index + 80) as never)
   }
+}
+
+export async function clearDemoWorkspace(db: PlaybookDb) {
+  await db.delete(activityPrerequisiteSnapshots)
+  await db.delete(salesActivities)
+  await db.delete(opportunities)
+  await db.delete(undefinedPlayLabels)
+  await db.delete(playVersionPrerequisites)
+  await db.delete(salesPlayVersions)
+  await db.delete(salesPlays)
+  await db.delete(people)
+  await db.delete(appMeta)
 }
 
 export async function seedPlantedWorkspace(db: PlaybookDb, now = new Date()) {
@@ -501,28 +515,42 @@ export async function seedPlantedWorkspace(db: PlaybookDb, now = new Date()) {
     }))
   )
   await insertChunks(db, salesPlayVersions, versionRows)
-
-  const prerequisiteRows = DEMO_PLAYS.flatMap((play) =>
-    play.prerequisites.map((item, index) => ({
-      id: `${play.id}-v1-${item.key}`,
-      versionId: `${play.id}-v1`,
-      prerequisiteKey: item.key,
-      text: item.text,
-      sortOrder: index,
-    }))
+  await insertChunks(
+    db,
+    playVersionPrerequisites,
+    DEMO_PLAYS.flatMap((play) =>
+      play.prerequisites.map((item, index) => ({
+        id: `${play.id}-v1-${item.key}`,
+        versionId: `${play.id}-v1`,
+        prerequisiteKey: item.key,
+        text: item.text,
+        sortOrder: index,
+      }))
+    )
   )
-  await insertChunks(db, playVersionPrerequisites, prerequisiteRows)
 
-  await db.insert(undefinedPlayLabels).values({
-    id: "label-security-questionnaire",
-    normalizedLabel: undefinedLabelKey(UNDEFINED_SECURITY_LABEL),
-    displayName: UNDEFINED_SECURITY_LABEL,
-    description: "Repeated ad hoc security reviews that are not yet a formal sales play.",
-    status: "open",
-    mappedPlayId: null,
-    createdAt: now,
-    updatedAt: now,
-  })
+  await db.insert(undefinedPlayLabels).values([
+    {
+      id: "label-security-questionnaire",
+      normalizedLabel: undefinedLabelKey(UNDEFINED_SECURITY_LABEL),
+      displayName: UNDEFINED_SECURITY_LABEL,
+      description: "Repeated ad hoc security reviews that are not yet a formal sales play.",
+      status: "open",
+      mappedPlayId: null,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      id: "label-executive-briefing",
+      normalizedLabel: undefinedLabelKey(UNDEFINED_BRIEFING_LABEL),
+      displayName: UNDEFINED_BRIEFING_LABEL,
+      description: "Occasional leadership conversations without a defined play.",
+      status: "open",
+      mappedPlayId: null,
+      createdAt: now,
+      updatedAt: now,
+    },
+  ])
 
   const planted = buildPlantedWorkspace()
 
@@ -569,8 +597,7 @@ export async function seedPlantedWorkspace(db: PlaybookDb, now = new Date()) {
   )
 
   const snapshotRows = planted.activities.flatMap((activity) => {
-    if (activity.captureKind === "undefined") return []
-    if (!activity.play) return []
+    if (activity.captureKind === "undefined" || !activity.play) return []
     return activity.play.prerequisites.map((prereq) => ({
       id: `${activity.id}-${prereq.key}`,
       activityId: activity.id,
@@ -583,7 +610,7 @@ export async function seedPlantedWorkspace(db: PlaybookDb, now = new Date()) {
   await insertChunks(db, activityPrerequisiteSnapshots, snapshotRows)
 
   await db.insert(appMeta).values([
-    { key: "demo_seed", value: "northstar-v1" },
+    { key: "demo_seed", value: SEED_VERSION },
     { key: "workspace_name", value: "Northstar SE" },
     { key: "data_source", value: "demo" },
   ])

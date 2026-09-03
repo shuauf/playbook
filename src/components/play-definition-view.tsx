@@ -1,6 +1,5 @@
 import Link from "next/link"
 
-import { ComingPanel } from "@/components/coming-panel"
 import { PageIntro } from "@/components/page-intro"
 import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
@@ -95,10 +94,13 @@ export function PlayDefinitionView({
       </Card>
 
       {mode === "health" ? (
-        <ComingPanel title="Compliant versus exception outcomes">
-          Play-level win rate, cycle time, sample sizes, and the prerequisite-by-prerequisite
-          breakdown will appear here after the analysis engine exists.
-        </ComingPanel>
+        <p className="text-sm text-muted-foreground">
+          Outcome comparisons for this play live on{" "}
+          <Link href="/" className="hover:underline">
+            Playbook Health
+          </Link>
+          .
+        </p>
       ) : null}
     </div>
   )

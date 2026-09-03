@@ -24,6 +24,8 @@ export const DEMO_PEOPLE: DemoPerson[] = [
   { id: "person-maya", name: "Maya Chen", role: "se", team: "West" },
   { id: "person-jordan", name: "Jordan Hale", role: "se", team: "East" },
   { id: "person-priya", name: "Priya Shah", role: "se", team: "Strategic" },
+  { id: "person-chris", name: "Chris Okonkwo", role: "se", team: "West" },
+  { id: "person-elena", name: "Elena Voss", role: "se", team: "East" },
   { id: "person-alex", name: "Alex Rivera", role: "ae", team: "West" },
   { id: "person-sam", name: "Sam Ortiz", role: "ae", team: "East" },
   { id: "person-dana", name: "Dana Cho", role: "ae", team: "Strategic" },
@@ -106,3 +108,45 @@ export const DEMO_PLAYS: DemoPlay[] = [
 ]
 
 export const UNDEFINED_SECURITY_LABEL = "Security questionnaire walkthrough"
+export const UNDEFINED_BRIEFING_LABEL = "Executive briefing"
+
+export const DEMO_ACCOUNTS = [
+  "Harborline",
+  "Northwind Health",
+  "Cedar Analytics",
+  "Brightfield",
+  "Summit Ledger",
+  "Kite & Co",
+  "Riverstone",
+  "Aperture Labs",
+  "Fieldwork",
+  "Orchard Systems",
+  "Helio Freight",
+  "Pinemark",
+  "Cobalt Retail",
+  "Lumenpath",
+  "Weston Clinics",
+  "Nimbus Insurance",
+  "Granite Bank",
+  "Sable Media",
+  "Ironclad Logistics",
+  "Vesper Energy",
+  "Maple & Pine",
+  "Blue Harbor Credit",
+  "Redwood Municipal",
+  "Atlas Components",
+  "Quill Education",
+]
+
+export const DEMO_DEAL_SHAPES = [
+  "platform expansion",
+  "renewal and upsell",
+  "new logo evaluation",
+  "regional rollout",
+  "security review cycle",
+  "data migration",
+  "care coordination",
+  "underwriting workflow",
+  "store operations",
+  "claims intake",
+]

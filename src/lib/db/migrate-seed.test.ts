@@ -57,9 +57,9 @@ describe("migrations and demo seed", () => {
       const plays = await db.select().from(salesPlays)
       const activities = await db.select().from(salesActivities)
       expect(plays).toHaveLength(SEED_CONTRACT.playCount)
-      expect(activities.filter((row) => row.captureKind === "undefined")).toHaveLength(
-        SEED_CONTRACT.undefinedActivityCount
-      )
+      expect(
+        activities.filter((row) => row.undefinedLabel === SEED_CONTRACT.undefinedLabel)
+      ).toHaveLength(SEED_CONTRACT.undefinedActivityCount)
     } finally {
       client.close()
     }
@@ -102,7 +102,9 @@ describe("migrations and demo seed", () => {
         .select()
         .from(salesActivities)
         .where(eq(salesActivities.captureKind, "undefined"))
-      expect(undefinedActivities).toHaveLength(SEED_CONTRACT.undefinedActivityCount)
+      expect(
+        undefinedActivities.filter((row) => row.undefinedLabel === SEED_CONTRACT.undefinedLabel)
+      ).toHaveLength(SEED_CONTRACT.undefinedActivityCount)
       expect(undefinedActivities.every((row) => row.playId === null)).toBe(true)
       expect(undefinedActivities.every((row) => row.playVersionId === null)).toBe(true)
 
@@ -115,8 +117,9 @@ describe("migrations and demo seed", () => {
       }
 
       const labels = await db.select().from(undefinedPlayLabels)
-      expect(labels).toHaveLength(1)
-      expect(labels[0]?.displayName).toBe(SEED_CONTRACT.undefinedLabel)
+      expect(labels.map((item) => item.displayName)).toEqual(
+        expect.arrayContaining([SEED_CONTRACT.undefinedLabel, SEED_CONTRACT.briefingLabel])
+      )
       expect(labels[0]?.status).toBe("open")
 
       const closed = await db.select().from(opportunities)
