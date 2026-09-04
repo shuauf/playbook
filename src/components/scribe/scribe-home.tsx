@@ -128,6 +128,7 @@ export function ScribeHome({
     ? 1 - analysis.totals.exceptionActivities / analysis.totals.definedActivities
     : null
   const liftPlay = analysis.plays
+    .filter((play) => play.win.confidence !== "insufficient" && play.win.difference !== null)
     .slice()
     .sort((a, b) => (b.win.difference ?? -1) - (a.win.difference ?? -1))[0]
   const lift = liftPlay?.win.difference ?? null
