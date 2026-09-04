@@ -90,6 +90,19 @@ export type PrerequisiteFinding = {
   closedOpportunityCount: number
   unmetRate: number | null
   win: RateComparison
+  cycle: CycleComparison
+}
+
+export type SignalFrequency = {
+  key: string
+  label: string
+  playName: string
+  metRate: number
+}
+
+export type SignalTrendPoint = {
+  label: string
+  metRate: number
 }
 
 export type StackingBucket = {
@@ -145,6 +158,8 @@ export type HealthAnalysis = {
   metrics: PortfolioMetric[]
   plays: PlayFinding[]
   prerequisites: PrerequisiteFinding[]
+  signalFrequencies: SignalFrequency[]
+  signalTrend: SignalTrendPoint[]
   stacking: StackingBucket[]
   stackingUseful: boolean
   actions: ActionItem[]

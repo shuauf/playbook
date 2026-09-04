@@ -15,7 +15,7 @@ export type IngestionSource = {
 
 export const DEMO_INGESTION_SOURCE: IngestionSource = {
   kind: "demo",
-  label: "Northstar SE demo workspace",
+  label: "Scribe Optimize demo workspace",
   isDemo: true,
 }
 

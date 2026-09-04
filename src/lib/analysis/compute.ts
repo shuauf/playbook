@@ -229,18 +229,59 @@ export function prerequisiteFindings(
       closedOpportunityCount: closed.length,
       unmetRate: withKey.length === 0 ? null : unmetActivities.length / withKey.length,
       win: rateComparison(met, unmet),
+      cycle: cycleComparison(met, unmet),
     }
   })
 }
 
 const PREREQUISITE_LABELS: Record<string, string> = {
-  "demo-discovery": "The SE has completed direct discovery",
-  "demo-problem": "The business problem is understood",
-  "demo-champion": "A champion or accountable stakeholder is involved",
-  "discovery-aligned": "AE and SE have aligned on the meeting objective",
-  "arch-risks": "Technical risks have been identified",
-  "workshop-agenda": "Success criteria and attendees are confirmed",
-  "poc-criteria": "The customer has agreed to success criteria",
+  "demo-discovery": "Use case tied to a measurable outcome",
+  "demo-problem": "Business problem confirmed",
+  "demo-champion": "Champion identified",
+  "discovery-aligned": "Current-state workflow mapped",
+  "discovery-problem": "Business problem confirmed",
+  "discovery-owner": "Process owner identified",
+  "arch-risks": "Automation and integration risks identified",
+  "arch-stakeholder": "Technical stakeholder engaged",
+  "arch-path": "System-of-record path confirmed",
+  "workshop-agenda": "Session outcomes agreed",
+  "workshop-workflow": "Target workflow selected for mapping",
+  "poc-criteria": "Success criteria agreed with customer",
+  "poc-technical": "Technical stakeholder engaged",
+}
+
+export function signalFrequencies(findings: PrerequisiteFinding[]) {
+  return findings
+    .map((item) => ({
+      key: item.key,
+      label: item.text,
+      playName: item.playName,
+      metRate: item.unmetRate === null ? 0 : 1 - item.unmetRate,
+    }))
+    .sort((a, b) => a.metRate - b.metRate)
+}
+
+export function signalTrend(activities: AnalysisActivity[]) {
+  const defined = activities.filter(
+    (activity) => activity.captureKind === "defined" && activity.evaluatedKeys.length > 0
+  )
+  const buckets = new Map<string, { met: number; total: number; sort: number }>()
+  for (const activity of defined) {
+    const year = activity.activityDate.getFullYear()
+    const month = activity.activityDate.getMonth()
+    const key = `${year}-${String(month + 1).padStart(2, "0")}`
+    const bucket = buckets.get(key) ?? { met: 0, total: 0, sort: year * 12 + month }
+    bucket.total += 1
+    if (activity.unmetKeys.length === 0) bucket.met += 1
+    buckets.set(key, bucket)
+  }
+  return [...buckets.entries()]
+    .sort((a, b) => a[1].sort - b[1].sort)
+    .slice(-6)
+    .map(([label, bucket]) => ({
+      label,
+      metRate: bucket.total === 0 ? 0 : bucket.met / bucket.total,
+    }))
 }
 
 export function prerequisiteLabel(key: string) {
@@ -276,9 +317,9 @@ export function stackingBuckets(pairs: OpportunityPlayPair[]): StackingBucket[] 
     }
   }
   return [
-    toBucket("none", "No unmet prerequisites", groups.none),
-    toBucket("one", "One unmet prerequisite", groups.one),
-    toBucket("twoPlus", "Two or more unmet prerequisites", groups.twoPlus),
+    toBucket("none", "No missing signals", groups.none),
+    toBucket("one", "One missing signal", groups.one),
+    toBucket("twoPlus", "Two or more missing signals", groups.twoPlus),
   ]
 }
 

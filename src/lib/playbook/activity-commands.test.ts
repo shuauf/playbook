@@ -175,7 +175,7 @@ describe("recordActivity", () => {
         .from(activityPrerequisiteSnapshots)
         .where(eq(activityPrerequisiteSnapshots.activityId, before.id))
       expect(oldSnapshots.find((item) => item.prerequisiteKey === "demo-problem")?.textAtCapture).toBe(
-        "The business problem is understood"
+        "Business problem confirmed"
       )
 
       const newDetail = await getActivityDetail(after.id, db)

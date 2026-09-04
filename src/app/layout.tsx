@@ -23,9 +23,8 @@ const sourceSerif = Source_Serif_4({
 })
 
 export const metadata: Metadata = {
-  title: "Playbook Iterator",
-  description:
-    "A decision-support application for Sales Engineering leaders. Keep an explicit playbook, record exceptions, and evolve the standard from evidence.",
+  title: "Scribe Optimize",
+  description: "See exactly what's happening in the playbook. Know exactly what to fix.",
 }
 
 export const dynamic = "force-dynamic"

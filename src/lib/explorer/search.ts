@@ -72,7 +72,7 @@ export function prerequisiteRollupLabel(
   allMet: boolean | null,
   unmetCount: number | null
 ) {
-  if (allMet === null || unmetCount === null) return "Unknown"
-  if (allMet) return "All met"
-  return `${unmetCount} unmet`
+  if (allMet === null || unmetCount === null) return "Off-playbook"
+  if (allMet) return "All signals present"
+  return unmetCount === 1 ? "1 signal missing" : `${unmetCount} signals missing`
 }

@@ -1,11 +1,11 @@
 "use client"
 
-import Link from "next/link"
 import { useState } from "react"
 
 import { confidenceFill } from "@/components/confidence-badge"
 import { formatCount, formatDays, pct, pp } from "@/lib/format"
 import type { PlayFinding } from "@/lib/analysis/types"
+import type { ConfidenceLevel } from "@/lib/domain/types"
 
 type Tip = { x: number; y: number; lines: string[] }
 
@@ -30,10 +30,10 @@ function playTip(play: PlayFinding) {
     play.playName,
     `${formatCount(play.activityCount)} activities · ${formatCount(play.opportunityCount)} opportunities`,
     `Exception rate ${play.exceptionRate === null ? "—" : pct(play.exceptionRate)}`,
-    `Win rate followed ${play.win.metRate === null ? "—" : pct(play.win.metRate)} (n=${play.win.metN})`,
-    `Win rate with exceptions ${play.win.unmetRate === null ? "—" : pct(play.win.unmetRate)} (n=${play.win.unmetN})`,
+    `Win rate when signals present ${play.win.metRate === null ? "—" : pct(play.win.metRate)}`,
+    `Win rate when signals missing ${play.win.unmetRate === null ? "—" : pct(play.win.unmetRate)}`,
     `Difference ${play.win.difference === null ? "—" : pp(play.win.difference, 0)}`,
-    `${play.win.confidence} sample`,
+    play.win.confidence === "insufficient" ? "Insufficient data" : `${play.win.confidence} sample`,
   ]
 }
 
@@ -92,33 +92,121 @@ export function ExceptionBubbleChart({ plays }: { plays: PlayFinding[] }) {
         {usable.map((play) => {
           const cx = x(play.exceptionRate ?? 0)
           const cy = y(play.win.difference ?? 0)
-          const r = 8 + (Math.sqrt(play.opportunityCount / maxSize) * 18)
+          const r = 8 + Math.sqrt(play.opportunityCount / maxSize) * 18
           const muted = play.win.confidence === "insufficient"
           return (
-            <a key={play.playId} href={`/plays/${play.playId}`}>
-              <circle
-                cx={cx}
-                cy={cy}
-                r={r}
-                fill={confidenceFill(play.win.confidence)}
-                fillOpacity={muted ? 0.28 : 0.72}
-                stroke={muted ? "oklch(0.7 0.02 80)" : "oklch(0.32 0.04 50)"}
-                strokeWidth="1"
-                onMouseEnter={(event) => {
-                  const box = event.currentTarget.ownerSVGElement?.getBoundingClientRect()
-                  setTip({
-                    x: event.clientX - (box?.left ?? 0) + 12,
-                    y: event.clientY - (box?.top ?? 0) + 12,
-                    lines: playTip(play),
-                  })
-                }}
-                onMouseLeave={() => setTip(null)}
-              />
-            </a>
+            <circle
+              key={play.playId}
+              cx={cx}
+              cy={cy}
+              r={r}
+              fill={confidenceFill(play.win.confidence)}
+              fillOpacity={muted ? 0.28 : 0.72}
+              stroke={muted ? "oklch(0.7 0.02 80)" : "oklch(0.32 0.04 50)"}
+              strokeWidth="1"
+              onMouseEnter={(event) => {
+                const box = event.currentTarget.ownerSVGElement?.getBoundingClientRect()
+                setTip({
+                  x: event.clientX - (box?.left ?? 0) + 12,
+                  y: event.clientY - (box?.top ?? 0) + 12,
+                  lines: playTip(play),
+                })
+              }}
+              onMouseLeave={() => setTip(null)}
+            />
           )
         })}
       </svg>
       <ChartTip tip={tip} />
+    </div>
+  )
+}
+
+export type OutcomeRow = {
+  id: string
+  label: string
+  followed: number | null
+  exception: number | null
+  difference: number | null
+  confidence: ConfidenceLevel
+}
+
+export function OutcomeDumbbell({
+  rows,
+  metric,
+}: {
+  rows: OutcomeRow[]
+  metric: "winRate" | "cycleTime"
+}) {
+  const usable = rows.filter((row) => row.followed !== null || row.exception !== null)
+  if (usable.length === 0) {
+    return <p className="text-sm text-muted-foreground">No closed comparisons in this view.</p>
+  }
+
+  const scaleMax =
+    metric === "winRate"
+      ? 1
+      : Math.max(30, ...usable.flatMap((row) => [row.followed ?? 0, row.exception ?? 0]))
+
+  return (
+    <div className="space-y-3">
+      {usable.map((row) => {
+        const followed = row.followed ?? 0
+        const exception = row.exception ?? 0
+        const muted = row.confidence === "insufficient"
+        const left = (Math.min(followed, exception) / scaleMax) * 100
+        const width = (Math.abs(followed - exception) / scaleMax) * 100
+        const delta =
+          row.difference === null
+            ? "—"
+            : metric === "winRate"
+              ? pp(row.difference, 0)
+              : `${row.difference > 0 ? "+" : ""}${Math.round(row.difference)}d`
+        return (
+          <div key={row.id}>
+            <div className="mb-1 flex items-baseline justify-between gap-2 text-sm">
+              <span className="font-medium">{row.label}</span>
+              <span className="text-xs text-muted-foreground">
+                {delta}
+                {row.confidence === "insufficient" ? " · insufficient data" : ""}
+              </span>
+            </div>
+            <div className="relative h-6">
+              <div className="absolute top-1/2 right-0 left-0 h-px -translate-y-1/2 bg-border" />
+              <div
+                className="absolute top-1/2 h-px -translate-y-1/2 bg-foreground/40"
+                style={{ left: `${left}%`, width: `${width}%` }}
+              />
+              <span
+                title={
+                  metric === "winRate"
+                    ? `Signals present ${pct(followed)}`
+                    : `Signals present ${formatDays(followed)}`
+                }
+                className={`absolute top-1/2 size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full ${
+                  muted ? "border border-foreground/40 bg-card" : "bg-[#3D8B8B]"
+                }`}
+                style={{ left: `${(followed / scaleMax) * 100}%` }}
+              />
+              <span
+                title={
+                  metric === "winRate"
+                    ? `Signals missing ${pct(exception)}`
+                    : `Signals missing ${formatDays(exception)}`
+                }
+                className={`absolute top-1/2 size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full ${
+                  muted ? "border border-foreground/30 bg-card" : "bg-[#D9893A]"
+                }`}
+                style={{ left: `${(exception / scaleMax) * 100}%` }}
+              />
+            </div>
+          </div>
+        )
+      })}
+      <p className="text-[11px] text-muted-foreground">
+        Teal marks are {metric === "winRate" ? "win rate" : "cycle time"} when every success signal was
+        present. Amber marks are when at least one was missing.
+      </p>
     </div>
   )
 }
@@ -128,58 +216,15 @@ export function WinRateDumbbell({ plays }: { plays: PlayFinding[] }) {
     .filter((play) => play.closedOpportunityCount > 0)
     .slice()
     .sort((a, b) => (b.win.difference ?? -1) - (a.win.difference ?? -1))
-  if (rows.length === 0) {
-    return <p className="text-sm text-muted-foreground">No closed play comparisons in this view.</p>
-  }
-  return (
-    <div className="space-y-3">
-      {rows.map((play) => {
-        const met = play.win.metRate ?? 0
-        const unmet = play.win.unmetRate ?? 0
-        const muted = play.win.confidence === "insufficient"
-        return (
-          <div key={play.playId}>
-            <div className="mb-1 flex items-baseline justify-between gap-2 text-sm">
-              <Link href={`/plays/${play.playId}`} className="font-medium hover:underline">
-                {play.playName}
-              </Link>
-              <span className="text-xs text-muted-foreground">
-                {play.win.difference === null ? "—" : pp(play.win.difference, 0)} · n {play.win.metN}/{play.win.unmetN}
-              </span>
-            </div>
-            <div className="relative h-6">
-              <div className="absolute top-1/2 right-0 left-0 h-px -translate-y-1/2 bg-border" />
-              <div
-                className="absolute top-1/2 h-px -translate-y-1/2 bg-foreground/40"
-                style={{
-                  left: `${Math.min(met, unmet) * 100}%`,
-                  width: `${Math.abs(met - unmet) * 100}%`,
-                }}
-              />
-              <span
-                title={`Followed ${pct(met)}`}
-                className={`absolute top-1/2 size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full ${
-                  muted ? "border border-foreground/40 bg-card" : "bg-[oklch(0.38_0.06_175)]"
-                }`}
-                style={{ left: `${met * 100}%` }}
-              />
-              <span
-                title={`Exceptions ${pct(unmet)}`}
-                className={`absolute top-1/2 size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full ${
-                  muted ? "border border-foreground/30 bg-card" : "bg-[oklch(0.5_0.12_25)]"
-                }`}
-                style={{ left: `${unmet * 100}%` }}
-              />
-            </div>
-          </div>
-        )
-      })}
-      <p className="text-[11px] text-muted-foreground">
-        Forest marks are win rate when every prerequisite was met. Coral marks are win rate when at
-        least one was unmet.
-      </p>
-    </div>
-  )
+    .map((play) => ({
+      id: play.playId,
+      label: play.playName,
+      followed: play.win.metRate,
+      exception: play.win.unmetRate,
+      difference: play.win.difference,
+      confidence: play.win.confidence,
+    }))
+  return <OutcomeDumbbell rows={rows} metric="winRate" />
 }
 
 export function CycleDivergingBars({ plays }: { plays: PlayFinding[] }) {
@@ -199,9 +244,7 @@ export function CycleDivergingBars({ plays }: { plays: PlayFinding[] }) {
           const width = (Math.abs(days) / max) * 50
           return (
             <div key={play.playId} className="grid grid-cols-[7rem_1fr_7rem] items-center gap-2 text-sm">
-              <Link href={`/plays/${play.playId}`} className="truncate hover:underline">
-                {play.playName}
-              </Link>
+              <span className="truncate">{play.playName}</span>
               <div className="relative h-5">
                 <div className="absolute top-0 bottom-0 left-1/2 w-px bg-foreground/50" />
                 <div
@@ -216,7 +259,7 @@ export function CycleDivergingBars({ plays }: { plays: PlayFinding[] }) {
                     width: `${width}%`,
                     left: days >= 0 ? "50%" : `${50 - width}%`,
                   }}
-                  title={`${formatDays(Math.abs(days))} ${days >= 0 ? "slower" : "faster"} · won n ${play.cycle.metN}/${play.cycle.unmetN}`}
+                  title={`${formatDays(Math.abs(days))} ${days >= 0 ? "slower" : "faster"}`}
                 />
               </div>
               <span className="text-right text-xs text-muted-foreground">

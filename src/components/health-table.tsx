@@ -1,7 +1,6 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import Link from "next/link"
 
 import { ConfidenceBadge } from "@/components/confidence-badge"
 import { formatCount, pct, pp } from "@/lib/format"
@@ -26,7 +25,13 @@ type SortKey =
   | "cycle"
   | "confidence"
 
-export function PlayPerformanceTable({ plays }: { plays: PlayFinding[] }) {
+export function PlayPerformanceTable({
+  plays,
+  onPlayClick,
+}: {
+  plays: PlayFinding[]
+  onPlayClick?: (playId: string) => void
+}) {
   const [sort, setSort] = useState<{ key: SortKey; dir: "asc" | "desc" }>({
     key: "activityCount",
     dir: "desc",
@@ -92,8 +97,8 @@ export function PlayPerformanceTable({ plays }: { plays: PlayFinding[] }) {
           <TableHead>{header("activityCount", "Activities")}</TableHead>
           <TableHead>{header("opportunityCount", "Opportunities")}</TableHead>
           <TableHead>{header("exceptionRate", "Exception rate")}</TableHead>
-          <TableHead>{header("metRate", "Win rate followed")}</TableHead>
-          <TableHead>{header("unmetRate", "Win rate exceptions")}</TableHead>
+          <TableHead>{header("metRate", "Win rate when signals present")}</TableHead>
+          <TableHead>{header("unmetRate", "Win rate when signals missing")}</TableHead>
           <TableHead>{header("difference", "Difference")}</TableHead>
           <TableHead>{header("cycle", "Cycle difference")}</TableHead>
           <TableHead>{header("confidence", "Confidence")}</TableHead>
@@ -103,20 +108,34 @@ export function PlayPerformanceTable({ plays }: { plays: PlayFinding[] }) {
         {rows.map((play) => (
           <TableRow key={play.playId} className={play.win.confidence === "insufficient" ? "opacity-70" : undefined}>
             <TableCell>
-              <Link href={`/plays/${play.playId}`} className="font-medium hover:underline">
-                {play.playName}
-              </Link>
+              {onPlayClick ? (
+                <button
+                  type="button"
+                  className="font-medium hover:underline"
+                  onClick={() => onPlayClick(play.playId)}
+                >
+                  {play.playName}
+                </button>
+              ) : (
+                <span className="font-medium">{play.playName}</span>
+              )}
             </TableCell>
             <TableCell>{formatCount(play.activityCount)}</TableCell>
             <TableCell>{formatCount(play.opportunityCount)}</TableCell>
             <TableCell>{play.exceptionRate === null ? "—" : pct(play.exceptionRate)}</TableCell>
             <TableCell>
-              {play.win.metRate === null ? "—" : pct(play.win.metRate)}
-              <span className="ml-1 text-xs text-muted-foreground">n={play.win.metN}</span>
+              {play.win.metRate === null
+                ? play.win.confidence === "insufficient"
+                  ? "Insufficient data"
+                  : "—"
+                : pct(play.win.metRate)}
             </TableCell>
             <TableCell>
-              {play.win.unmetRate === null ? "—" : pct(play.win.unmetRate)}
-              <span className="ml-1 text-xs text-muted-foreground">n={play.win.unmetN}</span>
+              {play.win.unmetRate === null
+                ? play.win.confidence === "insufficient"
+                  ? "Insufficient data"
+                  : "—"
+                : pct(play.win.unmetRate)}
             </TableCell>
             <TableCell>{play.win.difference === null ? "—" : pp(play.win.difference, 0)}</TableCell>
             <TableCell>

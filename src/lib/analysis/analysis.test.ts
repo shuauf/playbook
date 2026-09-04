@@ -15,6 +15,7 @@ import { periodWindow } from "@/lib/analysis/period"
 import { assemblePulse } from "@/lib/analysis/pulse"
 import type { AnalysisActivity, AnalysisOpportunity, AnalysisSnapshot } from "@/lib/analysis/types"
 import { DEFAULT_HEALTH_FILTERS } from "@/lib/navigation"
+import { DEMO_PLAYS } from "@/lib/db/catalog"
 import { buildPlantedWorkspace, SEED_AS_OF, SEED_CONTRACT } from "@/lib/db/seed-planted"
 
 function snapshotFromPlanted(): AnalysisSnapshot {
@@ -52,18 +53,12 @@ function snapshotFromPlanted(): AnalysisSnapshot {
   return {
     opportunities,
     activities,
-    plays: [
-      { id: "play-discovery", name: "Discovery", status: "active", typicalStages: ["Qualify"] },
-      { id: "play-product-demo", name: "Product Demo", status: "active", typicalStages: ["Evaluate"] },
-      {
-        id: "play-architecture-review",
-        name: "Architecture Review",
-        status: "active",
-        typicalStages: ["Validate"],
-      },
-      { id: "play-workshop", name: "Workshop", status: "active", typicalStages: ["Evaluate", "Propose"] },
-      { id: "play-poc", name: "Proof of Concept", status: "active", typicalStages: ["Prove"] },
-    ],
+    plays: DEMO_PLAYS.map((play) => ({
+      id: play.id,
+      name: play.name,
+      status: "active",
+      typicalStages: play.typicalStages,
+    })),
   }
 }
 
@@ -104,6 +99,10 @@ describe("analysis engine", () => {
     expect(problem?.win.metN).toBe(SEED_CONTRACT.enforceMetClosed)
     expect(problem?.win.unmetN).toBe(SEED_CONTRACT.enforceUnmetClosed)
     expect(problem?.win.difference).toBeGreaterThan(0.2)
+    expect(problem?.cycle.metDays).toBeGreaterThan(0)
+    expect(problem?.cycle.unmetDays).toBeGreaterThan(0)
+    expect(allTime.signalFrequencies.some((item) => item.key === "demo-problem")).toBe(true)
+    expect(allTime.signalTrend.length).toBeGreaterThan(0)
   })
 
   it("uses won opportunities only for cycle-time comparison", () => {

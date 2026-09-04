@@ -103,7 +103,9 @@ export function HealthView({
                     {item.subject}
                   </Link>
                   <p className="mt-1 text-sm text-muted-foreground">{item.evidence}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">n={formatCount(item.sampleSize)}</p>
+                  {item.confidence === "insufficient" ? (
+                    <p className="mt-1 text-xs text-muted-foreground">Insufficient data</p>
+                  ) : null}
                 </div>
               ))
             )}

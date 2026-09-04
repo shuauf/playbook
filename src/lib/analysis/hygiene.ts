@@ -1,6 +1,5 @@
 import { formatDisplayDate } from "@/lib/dates"
 import { undefinedExplorerHref } from "@/lib/analysis/actions"
-import { explorerQuery } from "@/lib/navigation"
 import type { AnalysisActivity, AnalysisSnapshot, HygieneIssue, PlayFinding } from "@/lib/analysis/types"
 
 export function hygieneIssues(
@@ -28,16 +27,7 @@ export function hygieneIssues(
       opportunityCount: new Set(rows.map((item) => item.opportunityId)).size,
       firstAt: formatDisplayDate(new Date(Math.min(...dates))),
       lastAt: formatDisplayDate(new Date(Math.max(...dates))),
-      href: `/activity?${explorerQuery({
-        view: "activities",
-        q: name,
-        outcome: "all",
-        team: "all",
-        se: "all",
-        playId: "all",
-        stage: "all",
-        capture: "undefined",
-      })}`,
+      href: "/?modal=explorer",
       action: "Define",
     })
   }
@@ -65,16 +55,7 @@ export function hygieneIssues(
       opportunityCount: new Set(rows.map((item) => item.opportunityId)).size,
       firstAt: formatDisplayDate(new Date(Math.min(...dates))),
       lastAt: formatDisplayDate(new Date(Math.max(...dates))),
-      href: playId ? `/activity?${explorerQuery({
-        view: "activities",
-        q: "",
-        outcome: "all",
-        team: "all",
-        se: "all",
-        playId,
-        stage: "all",
-        capture: "defined",
-      })}` : "/activity?view=activities",
+      href: playId ? `/?modal=play&playId=${playId}` : "/?modal=explorer",
       action: "View activities",
     })
   }
@@ -90,7 +71,7 @@ export function hygieneIssues(
       opportunityCount: finding?.opportunityCount ?? 0,
       firstAt: null,
       lastAt: null,
-      href: `/plays/${play.id}`,
+      href: `/?modal=play&playId=${play.id}`,
       action: "Review",
     })
   }
@@ -102,7 +83,7 @@ export function hygieneIssues(
     issues.push({
       id: "missing-snapshots",
       kind: "missing_snapshots",
-      name: "Defined activities missing prerequisite information",
+      name: "Defined activities missing success-signal information",
       activityCount: missing.length,
       opportunityCount: new Set(missing.map((item) => item.opportunityId)).size,
       firstAt: formatDisplayDate(
@@ -111,7 +92,7 @@ export function hygieneIssues(
       lastAt: formatDisplayDate(
         new Date(Math.max(...missing.map((item) => item.activityDate.getTime())))
       ),
-      href: undefinedExplorerHref().replace("capture=undefined", "capture=defined"),
+      href: undefinedExplorerHref(),
       action: "Review",
     })
   }

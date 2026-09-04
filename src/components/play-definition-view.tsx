@@ -53,7 +53,7 @@ export function PlayDefinitionView({
         <CardHeader className="border-b">
           <CardTitle>Definition</CardTitle>
           <CardDescription>
-            Typical stages and the current prerequisite list. Editing will create a new version
+            Typical stages and the current success-signal list. Editing will create a new version
             rather than rewriting history.
           </CardDescription>
         </CardHeader>
@@ -66,7 +66,7 @@ export function PlayDefinitionView({
           </div>
           <div>
             <p className="text-xs tracking-[0.12em] text-muted-foreground uppercase">
-              Prerequisites
+              Success signals
             </p>
             <ol className="mt-2 list-decimal space-y-2 pl-5">
               {play.prerequisites.map((item) => (
