@@ -49,7 +49,7 @@ describe("playbook read queries", () => {
     const { db, client } = await seededDb()
     try {
       const labels = await listOpenUndefinedLabels(db)
-      expect(labels[0]?.displayName).toMatch(/security questionnaire/i)
+      expect(labels[0]?.displayName).toMatch(/executive workflow audit/i)
       const opportunity = await getOpportunityDetail("opp-undef-01", db)
       expect(opportunity).toBeTruthy()
       const undefinedActivity = opportunity?.activities.find((item) => item.captureKind === "undefined")
@@ -59,7 +59,7 @@ describe("playbook read queries", () => {
 
       const snapshot = await getActivityDetail(undefinedActivity!.id, db)
       expect(snapshot?.snapshots).toEqual([])
-      expect(snapshot?.playName).toMatch(/security questionnaire/i)
+      expect(snapshot?.playName).toMatch(/executive workflow audit/i)
     } finally {
       client.close()
     }

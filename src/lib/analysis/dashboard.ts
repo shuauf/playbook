@@ -6,6 +6,8 @@ import {
   playFindings,
   portfolioStats,
   prerequisiteFindings,
+  signalFrequencies,
+  signalTrend,
   stackingBuckets,
 } from "@/lib/analysis/compute"
 import { hygieneIssues } from "@/lib/analysis/hygiene"
@@ -16,7 +18,7 @@ import type {
   HealthAnalysis,
   PortfolioMetric,
 } from "@/lib/analysis/types"
-import { explorerQuery, type HealthFilters } from "@/lib/navigation"
+import type { HealthFilters } from "@/lib/navigation"
 
 function metricDelta(current: number | null, prior: number | null) {
   if (current === null || prior === null) return null
@@ -53,15 +55,6 @@ export function analyzeHealth(
   const hygiene = hygieneIssues(snapshot, activities, plays)
   const actions = rankActions({ plays, prerequisites, hygiene })
 
-  const explorerBase = {
-    q: "",
-    team: filters.team,
-    se: filters.se,
-    playId: filters.playId,
-    stage: filters.stage,
-    outcome: filters.outcome,
-  }
-
   const metrics: PortfolioMetric[] = [
     {
       id: "win-rate",
@@ -71,7 +64,7 @@ export function analyzeHealth(
       prior: prior?.winRate === null || prior === null ? null : formatSignedPct(metricDelta(current.winRate, prior.winRate)),
       delta: metricDelta(current.winRate, prior?.winRate ?? null),
       definition: "Won opportunities divided by won plus lost. Open opportunities are excluded.",
-      href: `/activity?${explorerQuery({ ...explorerBase, view: "opportunities", capture: "all" })}`,
+      href: "/?modal=explorer",
     },
     {
       id: "cycle",
@@ -84,7 +77,7 @@ export function analyzeHealth(
           : formatSignedDays(metricDelta(current.medianCycleDays, prior.medianCycleDays)),
       delta: metricDelta(current.medianCycleDays, prior?.medianCycleDays ?? null),
       definition: "Median days from opportunity created date to close date for won opportunities only.",
-      href: `/activity?${explorerQuery({ ...explorerBase, view: "opportunities", outcome: "won", capture: "all" })}`,
+      href: "/?modal=explorer",
     },
     {
       id: "activities",
@@ -95,7 +88,7 @@ export function analyzeHealth(
         prior === null ? null : formatSignedCount(current.activities - prior.activities),
       delta: prior === null ? null : current.activities - prior.activities,
       definition: "Individual sales activities in the selected period, including repeats and undefined work.",
-      href: `/activity?${explorerQuery({ ...explorerBase, view: "activities", capture: "all" })}`,
+      href: "/?modal=explorer",
     },
     {
       id: "exception-rate",
@@ -108,8 +101,8 @@ export function analyzeHealth(
           : formatSignedPct(metricDelta(current.exceptionRate, prior.exceptionRate)),
       delta: metricDelta(current.exceptionRate, prior?.exceptionRate ?? null),
       definition:
-        "Share of defined activities with at least one unmet prerequisite. Undefined activities are excluded.",
-      href: `/activity?${explorerQuery({ ...explorerBase, view: "activities", capture: "defined" })}`,
+        "Share of defined activities with at least one missing success signal. Off-playbook activities are excluded.",
+      href: "/?modal=explorer",
     },
     {
       id: "undefined",
@@ -121,7 +114,7 @@ export function analyzeHealth(
       delta: prior === null ? null : current.undefinedActivities - prior.undefinedActivities,
       definition:
         "Activities that do not map to a formal active or historical sales-play definition.",
-      href: `/activity?${explorerQuery({ ...explorerBase, view: "activities", capture: "undefined" })}`,
+      href: "/?modal=explorer",
     },
   ]
 
@@ -141,6 +134,8 @@ export function analyzeHealth(
     metrics,
     plays,
     prerequisites,
+    signalFrequencies: signalFrequencies(prerequisites),
+    signalTrend: signalTrend(activities),
     stacking,
     stackingUseful,
     actions,

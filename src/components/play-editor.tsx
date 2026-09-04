@@ -140,7 +140,7 @@ export function PlayEditor({
         </fieldset>
         <div className="grid gap-3">
           <div className="flex items-center justify-between">
-            <Label>Prerequisites</Label>
+            <Label>Success signals</Label>
             <Button
               type="button"
               variant="outline"
@@ -163,7 +163,7 @@ export function PlayEditor({
                       )
                     )
                   }
-                  placeholder="What should be true before this play runs?"
+                  placeholder="Calls where this was present tended to go better"
                 />
                 <div className="flex gap-1">
                   <Button type="button" variant="ghost" size="icon-sm" onClick={() => move(index, -1)}>

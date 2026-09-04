@@ -23,7 +23,7 @@ import type { PlaybookDb } from "@/lib/db/types"
 import { undefinedLabelKey } from "@/lib/domain/labels"
 import type { OpportunityOutcome, PipelineStage, PrerequisiteStatus } from "@/lib/domain/types"
 
-export const SEED_VERSION = "northstar-v3"
+export const SEED_VERSION = "scribe-optimize-v1"
 export const SEED_AS_OF = new Date(2026, 8, 3)
 const DEMO_SOURCE = "demo"
 
@@ -113,7 +113,7 @@ function createdDaysAgo(kind: WindowKind, salt: number) {
 function identity(index: number) {
   const se = SES[index % SES.length]!
   const ae = AES[index % AES.length]!
-  const segments = ["SMB", "Mid-market", "Enterprise"] as const
+  const segments = ["Enterprise", "Enterprise", "Mid-market"] as const
   const account = DEMO_ACCOUNTS[index % DEMO_ACCOUNTS.length]!
   const shape = DEMO_DEAL_SHAPES[index % DEMO_DEAL_SHAPES.length]!
   return {
@@ -214,7 +214,7 @@ export function buildPlantedWorkspace() {
     const champion: PrerequisiteStatus = index % 5 === 0 || index % 5 === 1 ? "not_met" : "met"
     const window = windowFor(index, demoClosed.length)
     const cycle =
-      row.problem === "not_met" ? 78 + (index % 16) : 54 + (index % 12)
+      row.problem === "not_met" ? 142 + (index % 28) : 98 + (index % 20)
     const opp = makeOpportunity({
       id: `opp-pd-${String(index + 1).padStart(3, "0")}`,
       index,
@@ -247,7 +247,11 @@ export function buildPlantedWorkspace() {
           play: discovery,
           dayOffset: 6,
           stageAtActivity: index % 17 === 0 ? "Validate" : "Qualify",
-          checks: { "discovery-aligned": index % 11 === 0 ? "not_met" : "met" },
+          checks: {
+            "discovery-aligned": index % 11 === 0 ? "not_met" : "met",
+            "discovery-problem": index % 13 === 0 ? "not_met" : "met",
+            "discovery-owner": "met",
+          },
         })
       )
     }
@@ -259,7 +263,11 @@ export function buildPlantedWorkspace() {
           play: architecture,
           dayOffset: 28,
           stageAtActivity: "Validate",
-          checks: { "arch-risks": index % 7 === 0 ? "not_met" : "met" },
+          checks: {
+            "arch-risks": index % 7 === 0 ? "not_met" : "met",
+            "arch-stakeholder": "met",
+            "arch-path": index % 19 === 0 ? "not_met" : "met",
+          },
         })
       )
     }
@@ -271,7 +279,7 @@ export function buildPlantedWorkspace() {
           play: poc,
           dayOffset: 40,
           stageAtActivity: "Prove",
-          checks: { "poc-criteria": "met" },
+          checks: { "poc-criteria": "met", "poc-technical": "met" },
         })
       )
     }
@@ -368,7 +376,7 @@ export function buildPlantedWorkspace() {
     closed: 12,
     won: 4,
     stage: "Evaluate",
-    cycle: 46,
+    cycle: 118,
     unmet: 6,
     startIndex: 1600,
   })
@@ -379,7 +387,7 @@ export function buildPlantedWorkspace() {
     won: 46,
     open: 36,
     stage: "Qualify",
-    cycle: 86,
+    cycle: 134,
     unmet: 18,
     startIndex: 1800,
     offStage: { count: 24, stage: "Validate" },
@@ -390,7 +398,7 @@ export function buildPlantedWorkspace() {
     closed: 70,
     won: 40,
     stage: "Validate",
-    cycle: 41,
+    cycle: 126,
     unmet: 22,
     startIndex: 2100,
   })
@@ -401,7 +409,7 @@ export function buildPlantedWorkspace() {
     won: 31,
     open: 12,
     stage: "Prove",
-    cycle: 22,
+    cycle: 168,
     unmet: 6,
     startIndex: 2300,
   })
@@ -414,9 +422,8 @@ export function buildPlantedWorkspace() {
       index: 2600 + index,
       outcome: index < 12 ? "won" : index < 22 ? "lost" : "open",
       window: windowFor(index, extraUndef),
-      cycleDays: 49,
+      cycleDays: 112,
       stage: "Validate",
-      name: `Ad hoc security review ${index + 1}`,
     })
     opps.push(opp)
   }
@@ -431,7 +438,7 @@ export function buildPlantedWorkspace() {
       activityDate: addDays(opp.createdAt, 16),
       stageAtActivity: "Validate",
       seName: opp.seName,
-      note: "Logged as an undefined activity. No prerequisite snapshot exists.",
+      note: "Logged off-playbook. No success-signal snapshot exists.",
       captureKind: "undefined",
       checks: {},
     })
@@ -448,7 +455,7 @@ export function buildPlantedWorkspace() {
       activityDate: addDays(host.createdAt, 20),
       stageAtActivity: "Propose",
       seName: host.seName,
-      note: "Occasional executive conversation without a play definition.",
+      note: "Process mining walkthrough outside the standard five plays.",
       captureKind: "undefined",
       checks: {},
     })
@@ -531,20 +538,20 @@ export async function seedPlantedWorkspace(db: PlaybookDb, now = new Date()) {
 
   await db.insert(undefinedPlayLabels).values([
     {
-      id: "label-security-questionnaire",
+      id: "label-executive-workflow-audit",
       normalizedLabel: undefinedLabelKey(UNDEFINED_SECURITY_LABEL),
       displayName: UNDEFINED_SECURITY_LABEL,
-      description: "Repeated ad hoc security reviews that are not yet a formal sales play.",
+      description: "Repeated executive workflow audits that are not yet a formal sales play.",
       status: "open",
       mappedPlayId: null,
       createdAt: now,
       updatedAt: now,
     },
     {
-      id: "label-executive-briefing",
+      id: "label-process-mining-walkthrough",
       normalizedLabel: undefinedLabelKey(UNDEFINED_BRIEFING_LABEL),
       displayName: UNDEFINED_BRIEFING_LABEL,
-      description: "Occasional leadership conversations without a defined play.",
+      description: "Occasional process-mining walkthroughs without a defined play.",
       status: "open",
       mappedPlayId: null,
       createdAt: now,
@@ -611,7 +618,7 @@ export async function seedPlantedWorkspace(db: PlaybookDb, now = new Date()) {
 
   await db.insert(appMeta).values([
     { key: "demo_seed", value: SEED_VERSION },
-    { key: "workspace_name", value: "Northstar SE" },
+    { key: "workspace_name", value: "Scribe Optimize" },
     { key: "data_source", value: "demo" },
   ])
 }

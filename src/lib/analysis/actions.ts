@@ -1,6 +1,5 @@
 import { pct, pp } from "@/lib/format"
 import type { ActionItem, HygieneIssue, PlayFinding, PrerequisiteFinding } from "@/lib/analysis/types"
-import { explorerQuery } from "@/lib/navigation"
 
 export const ACTION_RULES = {
   enforceExceptionRate: 0.2,
@@ -44,10 +43,10 @@ export function rankActions(input: {
         subject: play.playName,
         playId: play.playId,
         playName: play.playName,
-        evidence: `${pct(play.exceptionRate)} of ${play.playName} activities contained an exception, associated with a ${pp(penalty, 0)} lower closed win rate (${play.win.metN} followed / ${play.win.unmetN} exception).`,
+        evidence: `${pct(play.exceptionRate)} of ${play.playName} activities were missing a success signal, associated with a ${pp(penalty, 0)} lower closed win rate.`,
         sampleSize: play.win.metN + play.win.unmetN,
         confidence: play.win.confidence,
-        href: `/plays/${play.playId}`,
+        href: `/?modal=play&playId=${play.playId}`,
       })
     } else if (
       play.closedOpportunityCount < 15 &&
@@ -61,10 +60,10 @@ export function rankActions(input: {
         subject: play.playName,
         playId: play.playId,
         playName: play.playName,
-        evidence: `${play.playName} shows a ${pp(penalty, 0)} win-rate gap, but the closed sample is only ${play.closedOpportunityCount} opportunities.`,
+        evidence: `${play.playName} shows a ${pp(penalty, 0)} win-rate gap, but there is not yet enough closed-opportunity data to act.`,
         sampleSize: play.closedOpportunityCount,
         confidence: "insufficient",
-        href: `/plays/${play.playId}`,
+        href: `/?modal=play&playId=${play.playId}`,
       })
     } else if (
       play.exceptionRate !== null &&
@@ -83,7 +82,7 @@ export function rankActions(input: {
         evidence: `${play.playName} exceptions appear in ${pct(play.exceptionRate)} of activities. The current comparison does not yet support a change to the play.`,
         sampleSize: play.closedOpportunityCount,
         confidence: play.win.confidence,
-        href: `/plays/${play.playId}`,
+        href: `/?modal=play&playId=${play.playId}`,
       })
     }
   }
@@ -103,10 +102,10 @@ export function rankActions(input: {
         subject: prereq.text,
         playId: prereq.playId,
         playName: prereq.playName,
-        evidence: `${pct(prereq.unmetRate)} of ${prereq.playName} executions skipped this prerequisite, with no meaningful win-rate difference (${pp(penalty ?? 0, 0)}).`,
+        evidence: `${pct(prereq.unmetRate)} of ${prereq.playName} calls did not show this signal, with no meaningful win-rate difference.`,
         sampleSize: prereq.win.metN + prereq.win.unmetN,
         confidence: prereq.win.confidence === "insufficient" ? "directional" : prereq.win.confidence,
-        href: `/plays/${prereq.playId}`,
+        href: `/?modal=play&playId=${prereq.playId}`,
       })
     } else if (
       prereq.unmetRate !== null &&
@@ -121,10 +120,10 @@ export function rankActions(input: {
         subject: prereq.text,
         playId: prereq.playId,
         playName: prereq.playName,
-        evidence: `Skipping “${prereq.text}” on ${prereq.playName} is associated with a ${pp(penalty, 0)} lower win rate (${prereq.win.metN} met / ${prereq.win.unmetN} unmet).`,
+        evidence: `Calls missing “${prereq.text}” on ${prereq.playName} are associated with a ${pp(penalty, 0)} lower win rate.`,
         sampleSize: prereq.win.metN + prereq.win.unmetN,
         confidence: prereq.win.confidence,
-        href: `/plays/${prereq.playId}`,
+        href: `/?modal=play&playId=${prereq.playId}`,
       })
     }
   }
@@ -137,7 +136,7 @@ export function rankActions(input: {
         subject: issue.name,
         playId: null,
         playName: null,
-        evidence: `${issue.activityCount} activities on ${issue.opportunityCount} opportunities used this undefined type. Prerequisite status is unknown.`,
+        evidence: `Logged off-playbook on ${issue.opportunityCount} opportunities. Success-signal status is unknown.`,
         sampleSize: issue.activityCount,
         confidence: issue.activityCount >= 40 ? "supported" : "directional",
         href: issue.href,
@@ -155,14 +154,5 @@ export function rankActions(input: {
 }
 
 export function undefinedExplorerHref() {
-  return `/activity?${explorerQuery({
-    view: "activities",
-    q: "",
-    outcome: "all",
-    team: "all",
-    se: "all",
-    playId: "all",
-    stage: "all",
-    capture: "undefined",
-  })}`
+  return "/?modal=explorer"
 }

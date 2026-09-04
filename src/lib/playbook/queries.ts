@@ -120,6 +120,7 @@ export async function listPlayDefinitions(inputDb?: PlaybookDb) {
       id: play.id,
       status: play.status,
       name: current?.name ?? play.id,
+      description: current?.description ?? "",
       typicalStages: current ? parseStages(current.typicalStages) : [],
       prerequisites: prerequisites.map((item) => ({
         key: item.prerequisiteKey,
