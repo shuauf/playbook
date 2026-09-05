@@ -29,6 +29,8 @@ describe("relative timestamps", () => {
     const asOf = new Date("2026-09-05T12:00:00Z")
     expect(formatRelativeAgo(new Date("2026-09-05T11:56:00Z"), asOf)).toBe("4 min ago")
     expect(formatRelativeAgo(new Date("2026-09-05T11:58:00Z"), asOf)).toBe("2 min ago")
+    expect(formatRelativeAgo(new Date("2026-09-05T09:00:00Z"), asOf)).toBe("3 hours ago")
+    expect(formatRelativeAgo(asOf, asOf)).toBe("moments ago")
     expect(formatRelativeAgo(new Date("2026-09-03T12:00:00Z"), asOf)).toBe("2 days ago")
   })
 })

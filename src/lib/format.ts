@@ -64,9 +64,9 @@ export function formatCycleSigned(days: number | null) {
 
 export function formatRelativeAgo(date: Date, asOf = new Date()) {
   const deltaMs = asOf.getTime() - date.getTime()
-  if (Number.isNaN(deltaMs) || deltaMs < 0) return "just now"
+  if (Number.isNaN(deltaMs) || deltaMs < 0) return "moments ago"
   const minutes = Math.round(deltaMs / 60_000)
-  if (minutes < 1) return "just now"
+  if (minutes < 1) return "moments ago"
   if (minutes === 1) return "1 min ago"
   if (minutes < 60) return `${minutes} min ago`
   const hours = Math.round(minutes / 60)

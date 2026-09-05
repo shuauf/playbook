@@ -222,7 +222,7 @@ export function ScribeHome({
       <section className="mt-5 rounded-2xl bg-[#2B2A27] px-3 py-3 text-[#f3f2ee]">
         <h2 className="font-heading text-xl">Play hygiene</h2>
         <p className="mt-0.5 text-xs text-white/55">
-          A fuller ring means the next review is closer. The number is days left, soonest first.
+          When each play is scheduled to be refreshed, and who owns it.
         </p>
         <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
           {hygieneRows.map(({ play, meta, countdown }) => (
