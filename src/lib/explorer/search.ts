@@ -73,6 +73,6 @@ export function prerequisiteRollupLabel(
   unmetCount: number | null
 ) {
   if (allMet === null || unmetCount === null) return "Off-playbook"
-  if (allMet) return "All signals present"
-  return unmetCount === 1 ? "1 signal missing" : `${unmetCount} signals missing`
+  if (allMet) return "All prerequisites present"
+  return unmetCount === 1 ? "1 prerequisite missing" : `${unmetCount} prerequisites missing`
 }

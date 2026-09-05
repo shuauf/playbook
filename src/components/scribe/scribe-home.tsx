@@ -1,13 +1,13 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { FlaskConical, Layers, Monitor, Search, Users } from "lucide-react"
-import type { ReactNode } from "react"
+import { useState } from "react"
 
 import { PlayPerformanceTable } from "@/components/health-table"
 import { OutcomeChart } from "@/components/scribe/outcome-chart"
 import { PerformanceTrendChart } from "@/components/scribe/performance-trend"
 import {
+  AddPlayModal,
   ExplorerModal,
   LogActivityModal,
   PlayModal,
@@ -15,20 +15,13 @@ import {
   type PersonChoice,
   type PlayDefinition,
 } from "@/components/scribe/modals"
+import { PlaySidebar } from "@/components/scribe/play-sidebar"
 import { PlaySignalSection } from "@/components/scribe/signal-charts"
 import { daysUntil, hygieneUrgencyFill } from "@/lib/dates"
 import { formatCount, formatRelativeAgo, pct, periodTitleLower, percentPoints } from "@/lib/format"
 import type { PlayDetail } from "@/lib/db/catalog"
 import type { HealthAnalysis, HygieneIssue } from "@/lib/analysis/types"
 import type { ExplorerActivity, ExplorerOpportunity } from "@/lib/explorer/types"
-
-const PLAY_ICONS: Record<string, ReactNode> = {
-  "play-discovery": <Search className="size-4" />,
-  "play-product-demo": <Monitor className="size-4" />,
-  "play-architecture-review": <Layers className="size-4" />,
-  "play-workshop": <Users className="size-4" />,
-  "play-poc": <FlaskConical className="size-4" />,
-}
 
 function HygieneRing({ days }: { days: number }) {
   const fill = hygieneUrgencyFill(days)
@@ -78,9 +71,8 @@ function OffPlaybookPanel({
 }) {
   return (
     <aside className="rounded-2xl bg-[#2B2A27] px-4 py-3 text-[#f3f2ee]">
-      <p className="text-[11px] tracking-[0.16em] text-white/50 uppercase">Off-playbook activity</p>
-      <p className="font-heading mt-0.5 text-lg leading-tight">Logged outside the defined plays</p>
-      <p className="mt-1 text-[11px] text-white/50">
+      <h2 className="font-heading text-xl text-[#f3f2ee]">Off-playbook activity</h2>
+      <p className="mt-0.5 text-xs text-white/55">
         Work SCs recorded that does not map to a defined play. {period}.
       </p>
       <div className="mt-2 divide-y divide-white/10">
@@ -142,6 +134,7 @@ export function ScribeHome({
   sync: { gongAt: string; salesforceAt: string }
 }) {
   const router = useRouter()
+  const [playsOpen, setPlaysOpen] = useState(false)
   const windowLower = periodTitleLower(analysis.filters.period)
   const offPlaybook = analysis.hygiene.filter((item) => item.kind === "undefined")
   const adherence = analysis.totals.definedActivities
@@ -171,17 +164,17 @@ export function ScribeHome({
   }
 
   return (
-    <div className="mx-auto w-full max-w-[1320px] px-4 pb-8 md:px-6">
-      <header className="flex flex-wrap items-center justify-between gap-2 py-2.5">
+    <div>
+      <header className="sticky top-0 z-40 flex h-14 items-center justify-between gap-2 border-b border-border/80 bg-[#f7f7f5] px-4 md:px-6">
         <p className="font-heading text-xl leading-none">Playbook</p>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2">
           <p className="text-[11px] tracking-[0.16em] text-muted-foreground uppercase">Track & iterate</p>
           <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs ring-1 ring-[#2B2A27]/10">
             <span className="size-2 rounded-full bg-[#D9893A]" />
             Gong
             <span className="text-muted-foreground">synced {formatRelativeAgo(new Date(sync.gongAt))}</span>
           </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs ring-1 ring-[#2B2A27]/10">
+          <span className="hidden items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs ring-1 ring-[#2B2A27]/10 sm:inline-flex">
             <span className="size-2 rounded-full bg-[#3D8B8B]" />
             Salesforce
             <span className="text-muted-foreground">synced {formatRelativeAgo(new Date(sync.salesforceAt))}</span>
@@ -203,46 +196,19 @@ export function ScribeHome({
         </div>
       </header>
 
-      <section>
-        <h1 className="font-heading text-[1.75rem] leading-tight md:text-[2rem]">
-          The <span className="text-[#D9893A]">plays</span>
-        </h1>
-        <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-          Defined plays in this workspace. Open a card for recommended prerequisites, success criteria,
-          and who should be in the room.
-        </p>
-        <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
-          {plays.map((play) => {
-            const meta = details[play.id]
-            return (
-              <button
-                key={play.id}
-                type="button"
-                onClick={() => open("play", { playId: play.id })}
-                className="cursor-pointer rounded-2xl bg-white px-3 py-3 text-left transition-shadow hover:bg-[#f7f7f5] hover:shadow-sm hover:ring-1 hover:ring-[#2B2A27]/10"
-              >
-                <div className="flex items-center gap-2">
-                  <div className="flex size-8 items-center justify-center rounded-full bg-[#EBEDF1] text-[#2B2A27]">
-                    {PLAY_ICONS[play.id]}
-                  </div>
-                  <p className="font-medium">{play.name}</p>
-                </div>
-                {meta ? (
-                  <div className="mt-2 flex flex-wrap gap-1">
-                    {meta.recommendedRoles.slice(0, 3).map((role) => (
-                      <span key={role} className="rounded-full bg-[#EBEDF1] px-2 py-0.5 text-[10px]">
-                        {role}
-                      </span>
-                    ))}
-                  </div>
-                ) : null}
-              </button>
-            )
-          })}
-        </div>
-      </section>
+      <PlaySidebar
+        plays={plays}
+        activePlayId={initialModal === "play" ? initialPlayId : undefined}
+        drawerOpen={playsOpen}
+        onToggleDrawer={() => setPlaysOpen((open) => !open)}
+        onCloseDrawer={() => setPlaysOpen(false)}
+        onSelect={(playId) => open("play", { playId })}
+        onAdd={() => open("add")}
+      />
 
-      <section className="mt-5 grid gap-3 xl:grid-cols-[minmax(0,1.2fr)_minmax(20rem,0.8fr)]">
+      <div className="pl-14 lg:pl-56">
+        <div className="mx-auto w-full max-w-[1320px] px-4 pb-8 pt-5 md:px-6">
+      <section className="grid gap-3 xl:grid-cols-[minmax(0,1.2fr)_minmax(20rem,0.8fr)]">
         <div>
           <h2 className="font-heading text-xl">What&apos;s happening</h2>
           <p className="mt-0.5 max-w-xl text-xs text-muted-foreground">
@@ -349,6 +315,7 @@ export function ScribeHome({
       {initialModal === "play" && selectedPlay ? (
         <PlayModal play={selectedPlay} detail={details[selectedPlay.id]} onClose={close} />
       ) : null}
+      {initialModal === "add" ? <AddPlayModal onClose={close} /> : null}
       {initialModal === "explorer" ? (
         <ExplorerModal
           activities={explorer.activities}
@@ -361,6 +328,8 @@ export function ScribeHome({
       {initialModal === "log" ? (
         <LogActivityModal opportunities={opportunities} plays={plays} people={people} onClose={close} />
       ) : null}
+        </div>
+      </div>
     </div>
   )
 }

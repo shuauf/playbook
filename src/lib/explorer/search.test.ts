@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest"
 
-import { filterActivities, filterOpportunities, matchesSearch } from "@/lib/explorer/search"
+import {
+  filterActivities,
+  filterOpportunities,
+  matchesSearch,
+  prerequisiteRollupLabel,
+} from "@/lib/explorer/search"
 import type { ExplorerActivity, ExplorerOpportunity } from "@/lib/explorer/types"
 import { DEFAULT_EXPLORER_FILTERS } from "@/lib/navigation"
 
@@ -120,5 +125,12 @@ describe("explorer search", () => {
         (row) => row.id
       )
     ).toEqual(["act-1"])
+  })
+
+  it("labels prerequisite rollups without calling them signals", () => {
+    expect(prerequisiteRollupLabel(true, 0)).toBe("All prerequisites present")
+    expect(prerequisiteRollupLabel(false, 1)).toBe("1 prerequisite missing")
+    expect(prerequisiteRollupLabel(false, 3)).toBe("3 prerequisites missing")
+    expect(prerequisiteRollupLabel(null, null)).toBe("Off-playbook")
   })
 })
