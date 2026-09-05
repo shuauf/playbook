@@ -156,7 +156,6 @@ export function ScribeHome({
         <div className="mx-auto w-full max-w-[1320px] px-4 pb-8 pt-5 md:px-6">
       <AiObservationsHero
         items={analysis.lookCloser}
-        period={windowLower}
         stats={[
           {
             value: adherence === null ? "—" : pct(adherence, 0),
