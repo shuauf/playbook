@@ -12,7 +12,7 @@ import { PIPELINE_STAGES, type PrerequisiteStatus } from "@/lib/domain/types"
 import type { ExplorerActivity, ExplorerOpportunity } from "@/lib/explorer/types"
 import { matchesSearch, prerequisiteRollupLabel } from "@/lib/explorer/search"
 import { recordActivityAction, savePlayAction } from "@/lib/playbook/actions"
-import type { PlayHygiene } from "@/lib/db/catalog"
+import type { PlayDetail } from "@/lib/db/catalog"
 import { cn } from "@/lib/utils"
 
 export type PlayDefinition = {
@@ -81,13 +81,28 @@ function ModalShell({
   )
 }
 
+function RoleChips({ roles }: { roles: string[] }) {
+  if (roles.length === 0) {
+    return <p className="text-sm text-muted-foreground">No recommended roles yet.</p>
+  }
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {roles.map((role) => (
+        <span key={role} className="rounded-full bg-[#EBEDF1] px-2.5 py-1 text-xs text-[#2B2A27]">
+          {role}
+        </span>
+      ))}
+    </div>
+  )
+}
+
 export function PlayModal({
   play,
-  hygiene,
+  detail,
   onClose,
 }: {
   play: PlayDefinition
-  hygiene?: PlayHygiene
+  detail?: PlayDetail
   onClose: () => void
 }) {
   const router = useRouter()
@@ -95,8 +110,14 @@ export function PlayModal({
   const [name, setName] = useState(play.name)
   const [description, setDescription] = useState(play.description)
   const [signals, setSignals] = useState(play.prerequisites)
+  const [signs, setSigns] = useState(detail?.signsOfSuccess.map((item) => item.text) ?? [""])
+  const [rolesText, setRolesText] = useState((detail?.recommendedRoles ?? []).join(", "))
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
+  const roles = rolesText
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean)
 
   function submit() {
     setError(null)
@@ -112,7 +133,7 @@ export function PlayModal({
         setError(result.error)
         return
       }
-      setMessage(result.changed ? "Saved a new play version for future activities." : "No changes to save.")
+      setMessage(result.changed ? "Saved a new play version for future activities." : "Saved.")
       router.refresh()
     })
   }
@@ -120,19 +141,19 @@ export function PlayModal({
   return (
     <ModalShell
       title={play.name}
-      subtitle="Success signals are observed patterns that tended to go better — not gates to satisfy."
+      subtitle="Two lists: what we think helps the play work, and what tells us it actually did."
       onClose={onClose}
     >
       <div className="mb-4 grid gap-3 sm:grid-cols-2">
         <div className="rounded-xl bg-[#EBEDF1] px-3 py-2">
           <p className="text-[11px] text-muted-foreground">Owner</p>
-          <p className="text-sm font-medium">{hygiene?.owner ?? "Solutions Engineering"}</p>
+          <p className="text-sm font-medium">{detail?.owner ?? "Solutions Engineering"}</p>
         </div>
         <div className="rounded-xl bg-[#EBEDF1] px-3 py-2">
           <p className="text-[11px] text-muted-foreground">Next refresh</p>
           <p className="text-sm font-medium">
-            {hygiene
-              ? new Date(`${hygiene.nextReview}T00:00:00`).toLocaleDateString("en-US", {
+            {detail
+              ? new Date(`${detail.nextReview}T00:00:00`).toLocaleDateString("en-US", {
                   month: "short",
                   day: "numeric",
                   year: "numeric",
@@ -140,6 +161,20 @@ export function PlayModal({
               : "—"}
           </p>
         </div>
+      </div>
+
+      <div className="mb-4">
+        <p className="text-[11px] text-muted-foreground">Recommended roles in the meeting</p>
+        <div className="mt-1.5">
+          <RoleChips roles={roles} />
+        </div>
+        <Input
+          className="mt-2"
+          value={rolesText}
+          onChange={(event) => setRolesText(event.target.value)}
+          placeholder="AE, SC, Champion"
+        />
+        <p className="mt-1 text-[11px] text-muted-foreground">Type names separated by commas. Each one becomes its own tag.</p>
       </div>
 
       <div className="grid gap-2">
@@ -155,9 +190,14 @@ export function PlayModal({
         />
       </div>
 
-      <div className="mt-5">
+      <div className="mt-5 rounded-2xl border border-border p-3">
         <div className="mb-2 flex items-center justify-between">
-          <Label>Success signals</Label>
+          <div>
+            <Label>Success signals</Label>
+            <p className="text-[11px] text-muted-foreground">
+              Things we believe make the play likely to succeed — not requirements to gate on.
+            </p>
+          </div>
           <Button
             type="button"
             variant="outline"
@@ -179,7 +219,7 @@ export function PlayModal({
                     )
                   )
                 }
-                placeholder="Calls where this was present tended to go better"
+                placeholder="The business problem is understood"
               />
               <Button
                 type="button"
@@ -194,8 +234,45 @@ export function PlayModal({
         </ol>
         <p className="mt-2 inline-flex items-center gap-1.5 text-[11px] text-muted-foreground">
           <span className="rounded-full bg-[#EBEDF1] px-2 py-0.5">detected via Gong</span>
-          Criteria results on logged calls are styled as if Gong call intelligence populated them.
+          Shown as if Gong tagged whether each signal was present.
         </p>
+      </div>
+
+      <div className="mt-4 rounded-2xl border border-border p-3">
+        <div className="mb-2 flex items-center justify-between">
+          <div>
+            <Label>Signs of success</Label>
+            <p className="text-[11px] text-muted-foreground">
+              Outcome indicators — signs the play actually went well, not preconditions to start it.
+            </p>
+          </div>
+          <Button type="button" variant="outline" size="sm" onClick={() => setSigns((current) => [...current, ""])}>
+            Add sign
+          </Button>
+        </div>
+        <ol className="space-y-2">
+          {signs.map((item, index) => (
+            <li key={`sign-${index}`} className="flex items-start gap-2">
+              <Input
+                value={item}
+                onChange={(event) =>
+                  setSigns((current) =>
+                    current.map((entry, entryIndex) => (entryIndex === index ? event.target.value : entry))
+                  )
+                }
+                placeholder="Customer articulated their own definition of the problem back to us"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => setSigns((current) => current.filter((_, entryIndex) => entryIndex !== index))}
+              >
+                ×
+              </Button>
+            </li>
+          ))}
+        </ol>
       </div>
 
       {error ? <p className="mt-3 text-sm text-destructive">{error}</p> : null}
@@ -263,7 +340,7 @@ export function ExplorerModal({
             type="button"
             className={cn(
               "rounded-full px-3 py-1 text-xs",
-              view === "all" ? "bg-[#2B2A27] text-white" : "text-muted-foreground"
+              view === "all" ? "bg-[#2B2A27] text-white" : "cursor-pointer text-muted-foreground hover:text-foreground"
             )}
             onClick={() => setView("all")}
           >
@@ -273,7 +350,7 @@ export function ExplorerModal({
             type="button"
             className={cn(
               "rounded-full px-3 py-1 text-xs",
-              view === "opportunity" ? "bg-[#2B2A27] text-white" : "text-muted-foreground"
+              view === "opportunity" ? "bg-[#2B2A27] text-white" : "cursor-pointer text-muted-foreground hover:text-foreground"
             )}
             onClick={() => setView("opportunity")}
           >
@@ -323,7 +400,7 @@ export function ExplorerModal({
               <div key={opportunity.id}>
                 <button
                   type="button"
-                  className="flex w-full items-center justify-between gap-3 py-3 text-left"
+                  className="flex w-full cursor-pointer items-center justify-between gap-3 py-3 text-left hover:bg-[#EBEDF1]"
                   onClick={() => setExpanded(open ? null : opportunity.id)}
                 >
                   <div>

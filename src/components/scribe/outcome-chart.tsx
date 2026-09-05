@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react"
 
 import { OutcomeDumbbell, type OutcomeRow } from "@/components/health-charts"
+import { PlayPick } from "@/components/scribe/play-pick"
 import type { HealthAnalysis } from "@/lib/analysis/types"
 import { cn } from "@/lib/utils"
 
@@ -26,8 +27,10 @@ function Toggle<T extends string>({
           type="button"
           onClick={() => onChange(option.id)}
           className={cn(
-            "rounded-full px-3 py-1 text-xs transition-colors",
-            value === option.id ? "bg-[#2B2A27] text-white" : "text-muted-foreground hover:text-foreground"
+            "cursor-pointer rounded-full px-3 py-1 text-xs transition-colors",
+            value === option.id
+              ? "bg-[#2B2A27] text-white"
+              : "text-muted-foreground hover:bg-[#EBEDF1] hover:text-foreground"
           )}
         >
           {option.label}
@@ -38,8 +41,14 @@ function Toggle<T extends string>({
 }
 
 export function OutcomeChart({ analysis }: { analysis: HealthAnalysis }) {
+  const playOptions = analysis.plays.filter((play) =>
+    analysis.prerequisites.some((item) => item.playId === play.playId)
+  )
   const [slice, setSlice] = useState<Slice>("play")
   const [metric, setMetric] = useState<Metric>("winRate")
+  const [signalPlayId, setSignalPlayId] = useState(
+    playOptions.find((play) => play.playId === "play-product-demo")?.playId ?? playOptions[0]?.playId ?? ""
+  )
 
   const rows = useMemo<OutcomeRow[]>(() => {
     if (slice === "play") {
@@ -72,7 +81,7 @@ export function OutcomeChart({ analysis }: { analysis: HealthAnalysis }) {
         )
     }
     return analysis.prerequisites
-      .filter((item) => item.closedOpportunityCount > 0)
+      .filter((item) => item.playId === signalPlayId && item.closedOpportunityCount > 0)
       .slice()
       .sort((a, b) =>
         metric === "winRate"
@@ -83,7 +92,7 @@ export function OutcomeChart({ analysis }: { analysis: HealthAnalysis }) {
         metric === "winRate"
           ? {
               id: `${item.playId}-${item.key}`,
-              label: `${item.text} · ${item.playName}`,
+              label: item.text,
               followed: item.win.metRate,
               exception: item.win.unmetRate,
               difference: item.win.difference,
@@ -91,14 +100,14 @@ export function OutcomeChart({ analysis }: { analysis: HealthAnalysis }) {
             }
           : {
               id: `${item.playId}-${item.key}`,
-              label: `${item.text} · ${item.playName}`,
+              label: item.text,
               followed: item.cycle.metDays,
               exception: item.cycle.unmetDays,
               difference: item.cycle.differenceDays,
               confidence: item.cycle.confidence,
             }
       )
-  }, [analysis.plays, analysis.prerequisites, metric, slice])
+  }, [analysis.plays, analysis.prerequisites, metric, signalPlayId, slice])
 
   return (
     <div>
@@ -120,6 +129,16 @@ export function OutcomeChart({ analysis }: { analysis: HealthAnalysis }) {
           ]}
         />
       </div>
+      {slice === "signal" ? (
+        <div className="mb-4">
+          <p className="mb-1.5 text-[11px] text-muted-foreground">Sales play</p>
+          <PlayPick
+            plays={playOptions.map((play) => ({ id: play.playId, name: play.playName }))}
+            value={signalPlayId}
+            onChange={setSignalPlayId}
+          />
+        </div>
+      ) : null}
       <OutcomeDumbbell rows={rows} metric={metric} />
     </div>
   )

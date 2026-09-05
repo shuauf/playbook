@@ -1,4 +1,4 @@
-import { formatCount, formatDays, pct, pp } from "@/lib/format"
+import { compactDelta, formatCount, formatDays, pct } from "@/lib/format"
 import { rankActions } from "@/lib/analysis/actions"
 import {
   filterActivities,
@@ -27,7 +27,7 @@ function metricDelta(current: number | null, prior: number | null) {
 
 function formatSignedPct(value: number | null) {
   if (value === null) return null
-  return pp(value, 0)
+  return compactDelta(value, 0)
 }
 
 function formatSignedDays(value: number | null) {
