@@ -119,31 +119,17 @@ export function ScribeHome({
     <div>
       <header className="sticky top-0 z-40 flex h-14 items-stretch gap-3 border-b border-border/80 bg-[#f7f7f5] px-3 md:px-5">
         <AppNav current="playbook-iteration" />
-        <div className="flex shrink-0 items-center justify-end gap-2">
-          <span className="hidden items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs ring-1 ring-[#2B2A27]/10 xl:inline-flex">
+        <div className="ml-auto flex shrink-0 items-center justify-end gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs ring-1 ring-[#2B2A27]/10">
             <span className="size-2 rounded-full bg-[#D9893A]" />
             Gong
             <span className="text-muted-foreground">synced {formatRelativeAgo(new Date(sync.gongAt))}</span>
           </span>
-          <span className="hidden items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs ring-1 ring-[#2B2A27]/10 xl:inline-flex">
+          <span className="hidden items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs ring-1 ring-[#2B2A27]/10 sm:inline-flex">
             <span className="size-2 rounded-full bg-[#3D8B8B]" />
             Salesforce
             <span className="text-muted-foreground">synced {formatRelativeAgo(new Date(sync.salesforceAt))}</span>
           </span>
-          <button
-            type="button"
-            onClick={() => open("explorer")}
-            className="cursor-pointer rounded-full border border-[#2B2A27]/20 bg-white px-4 py-1.5 text-sm hover:bg-[#EBEDF1]"
-          >
-            Activity explorer
-          </button>
-          <button
-            type="button"
-            onClick={() => open("log")}
-            className="cursor-pointer rounded-full bg-[#2B2A27] px-4 py-1.5 text-sm text-white hover:bg-[#3a3936]"
-          >
-            Log activity
-          </button>
         </div>
       </header>
 
@@ -183,6 +169,8 @@ export function ScribeHome({
           },
         ]}
         onOpen={(href) => router.push(href)}
+        onExplorer={() => open("explorer")}
+        onLog={() => open("log")}
       />
 
       <section className="mt-6 grid gap-3 xl:grid-cols-2">
