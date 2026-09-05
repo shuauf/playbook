@@ -88,7 +88,7 @@ export function PerformanceTrendChart({ analysis }: { analysis: HealthAnalysis }
         <PlayPick plays={playOptions} value={playId} onChange={setPlayId} />
       </div>
       <p className="mb-2 text-[11px] text-muted-foreground">
-        {labels[metric]} over the {period}, computed from closed deals and logged calls — not a snapshot.
+        {labels[metric]} over the {period}, computed from closed deals and logged activities — not a snapshot.
       </p>
       {points.length === 0 ? (
         <p className="text-sm text-muted-foreground">Not enough dated activity to draw a trend yet.</p>

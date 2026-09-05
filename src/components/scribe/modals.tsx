@@ -9,8 +9,10 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { formatIsoDate } from "@/lib/dates"
 import { PIPELINE_STAGES, type PrerequisiteStatus } from "@/lib/domain/types"
+import type { HygieneIssue } from "@/lib/analysis/types"
 import type { ExplorerActivity, ExplorerOpportunity } from "@/lib/explorer/types"
 import { matchesSearch, prerequisiteRollupLabel } from "@/lib/explorer/search"
+import { formatCount } from "@/lib/format"
 import { createPlayAction, recordActivityAction, savePlayAction } from "@/lib/playbook/actions"
 import type { PlayDetail } from "@/lib/db/catalog"
 import { cn } from "@/lib/utils"
@@ -78,6 +80,56 @@ function ModalShell({
         <div className="px-5 py-4">{children}</div>
       </div>
     </div>
+  )
+}
+
+export function OffPlaybookModal({
+  items,
+  period,
+  onClose,
+  onOpen,
+}: {
+  items: HygieneIssue[]
+  period: string
+  onClose: () => void
+  onOpen: (query: string) => void
+}) {
+  return (
+    <ModalShell
+      title="Off-playbook activity"
+      subtitle={`Work SCs recorded that does not map to a defined play. ${period}.`}
+      onClose={onClose}
+    >
+      <div className="divide-y divide-border">
+        {items.length === 0 ? (
+          <p className="py-2 text-sm text-muted-foreground">No off-playbook activity in the {period}.</p>
+        ) : (
+          items.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => onOpen(item.name)}
+              className="flex w-full cursor-pointer items-start justify-between gap-3 py-2.5 text-left hover:bg-[#EBEDF1]/70"
+            >
+              <div className="min-w-0">
+                <p className="text-sm font-medium">{item.name}</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {item.activityCount === 1
+                    ? "1 activity"
+                    : `${formatCount(item.activityCount)} activities`}
+                  {" · "}
+                  {item.opportunityCount === 1
+                    ? "1 opportunity"
+                    : `${formatCount(item.opportunityCount)} opportunities`}
+                  {item.lastAt ? ` · last ${item.lastAt}` : ""}
+                </p>
+              </div>
+              <span className="shrink-0 text-[11px] text-muted-foreground">View</span>
+            </button>
+          ))
+        )}
+      </div>
+    </ModalShell>
   )
 }
 
@@ -234,7 +286,7 @@ export function PlayModal({
         </ol>
         <p className="mt-2 inline-flex items-center gap-1.5 text-[11px] text-muted-foreground">
           <span className="rounded-full bg-[#EBEDF1] px-2 py-0.5">detected via Gong</span>
-          Shown as if call recordings tagged whether each recommended prerequisite was present.
+          Shown as if recordings tagged whether each recommended prerequisite was present.
         </p>
       </div>
 

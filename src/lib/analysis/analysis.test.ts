@@ -8,6 +8,7 @@ import {
   opportunityPlayPairs,
   playFindings,
   portfolioStats,
+  portfolioWinLift,
   rateComparison,
 } from "@/lib/analysis/compute"
 import { analyzeHealth } from "@/lib/analysis/dashboard"
@@ -151,6 +152,10 @@ describe("analysis engine", () => {
     expect(demo?.win.confidence).toBe("supported")
     expect(demo?.win.difference).toBeGreaterThan(0.08)
     expect(current.actions.some((item) => item.classification === "enforce")).toBe(true)
+    const lift = portfolioWinLift(current.plays)
+    const architecture = current.plays.find((item) => item.playId === "play-architecture-review")
+    expect(lift).not.toBeNull()
+    expect(lift).not.toBe(architecture?.win.difference)
   })
 
   it("ranks deterministic actions from the planted story", () => {

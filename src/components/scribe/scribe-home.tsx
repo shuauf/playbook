@@ -10,6 +10,7 @@ import {
   AddPlayModal,
   ExplorerModal,
   LogActivityModal,
+  OffPlaybookModal,
   PlayModal,
   type OpportunityChoice,
   type PersonChoice,
@@ -17,10 +18,11 @@ import {
 } from "@/components/scribe/modals"
 import { PlaySidebar } from "@/components/scribe/play-sidebar"
 import { PlaySignalSection } from "@/components/scribe/signal-charts"
+import { portfolioWinLift } from "@/lib/analysis/compute"
 import { daysUntil, hygieneUrgencyFill } from "@/lib/dates"
 import { formatCount, formatRelativeAgo, pct, periodTitleLower, percentPoints } from "@/lib/format"
 import type { PlayDetail } from "@/lib/db/catalog"
-import type { HealthAnalysis, HygieneIssue } from "@/lib/analysis/types"
+import type { HealthAnalysis } from "@/lib/analysis/types"
 import type { ExplorerActivity, ExplorerOpportunity } from "@/lib/explorer/types"
 
 function HygieneRing({ days }: { days: number }) {
@@ -60,54 +62,6 @@ function hygieneCountdown(isoDate: string, asOf: Date) {
   return { days, label: `${days} days until the next scheduled review.` }
 }
 
-function OffPlaybookPanel({
-  items,
-  period,
-  onOpen,
-}: {
-  items: HygieneIssue[]
-  period: string
-  onOpen: (query: string) => void
-}) {
-  return (
-    <aside className="rounded-2xl bg-[#2B2A27] px-4 py-3 text-[#f3f2ee]">
-      <h2 className="font-heading text-xl text-[#f3f2ee]">Off-playbook activity</h2>
-      <p className="mt-0.5 text-xs text-white/55">
-        Work SCs recorded that does not map to a defined play. {period}.
-      </p>
-      <div className="mt-2 divide-y divide-white/10">
-        {items.length === 0 ? (
-          <p className="py-2 text-sm text-white/60">No off-playbook activity in the {period}.</p>
-        ) : (
-          items.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => onOpen(item.name)}
-              className="flex w-full cursor-pointer items-start justify-between gap-3 py-2.5 text-left hover:bg-white/5"
-            >
-              <div className="min-w-0">
-                <p className="text-sm font-medium">{item.name}</p>
-                <p className="mt-0.5 text-xs text-white/55">
-                  {item.activityCount === 1
-                    ? "1 call"
-                    : `${formatCount(item.activityCount)} calls`}
-                  {" · "}
-                  {item.opportunityCount === 1
-                    ? "1 opportunity"
-                    : `${formatCount(item.opportunityCount)} opportunities`}
-                  {item.lastAt ? ` · last ${item.lastAt}` : ""}
-                </p>
-              </div>
-              <span className="shrink-0 text-[11px] text-white/45">View</span>
-            </button>
-          ))
-        )}
-      </div>
-    </aside>
-  )
-}
-
 export function ScribeHome({
   analysis,
   plays,
@@ -140,11 +94,7 @@ export function ScribeHome({
   const adherence = analysis.totals.definedActivities
     ? 1 - analysis.totals.exceptionActivities / analysis.totals.definedActivities
     : null
-  const liftPlay = analysis.plays
-    .filter((play) => play.win.confidence !== "insufficient" && play.win.difference !== null)
-    .slice()
-    .sort((a, b) => (b.win.difference ?? -1) - (a.win.difference ?? -1))[0]
-  const lift = liftPlay?.win.difference ?? null
+  const lift = portfolioWinLift(analysis.plays)
   const selectedPlay = plays.find((play) => play.id === initialPlayId) ?? plays[0]
   const hygieneRows = plays
     .map((play) => {
@@ -199,69 +149,46 @@ export function ScribeHome({
       <PlaySidebar
         plays={plays}
         activePlayId={initialModal === "play" ? initialPlayId : undefined}
+        offbookActive={initialModal === "offbook"}
+        offbookCount={offPlaybook.length}
         drawerOpen={playsOpen}
         onToggleDrawer={() => setPlaysOpen((open) => !open)}
         onCloseDrawer={() => setPlaysOpen(false)}
         onSelect={(playId) => open("play", { playId })}
+        onOffbook={() => open("offbook")}
         onAdd={() => open("add")}
       />
 
       <div className="pl-14 lg:pl-56">
         <div className="mx-auto w-full max-w-[1320px] px-4 pb-8 pt-5 md:px-6">
-      <section className="grid gap-3 xl:grid-cols-[minmax(0,1.2fr)_minmax(20rem,0.8fr)]">
-        <div>
-          <h2 className="font-heading text-xl">What&apos;s happening</h2>
-          <p className="mt-0.5 max-w-xl text-xs text-muted-foreground">
-            Snapshot of defined-play activity in the {windowLower}.
-          </p>
-          <div className="mt-2 grid grid-cols-3 gap-2">
-            <div className="rounded-2xl bg-white px-3 py-3">
-              <p className="text-3xl font-medium tracking-tight">
-                {adherence === null ? "—" : pct(adherence, 0)}
-              </p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                of calls had every recommended prerequisite
-              </p>
-            </div>
-            <div className="rounded-2xl bg-white px-3 py-3">
-              <p className="text-3xl font-medium tracking-tight">
-                {lift === null ? "—" : `${percentPoints(lift, 0)}%`}
-              </p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {lift === null
-                  ? `No supported win-rate comparison`
-                  : `higher win rate when recommended prerequisites were present${liftPlay ? ` — ${liftPlay.playName}` : ""}`}
-              </p>
-            </div>
-            <div className="rounded-2xl bg-white px-3 py-3">
-              <p className="text-3xl font-medium tracking-tight">{formatCount(analysis.totals.activities)}</p>
-              <p className="mt-1 text-xs text-muted-foreground">calls logged</p>
-            </div>
+      <section>
+        <h2 className="font-heading text-xl">Management view</h2>
+        <p className="mt-0.5 max-w-xl text-xs text-muted-foreground">
+          Snapshot of defined-play activity in the {windowLower}.
+        </p>
+        <div className="mt-2 grid grid-cols-3 gap-2">
+          <div className="rounded-2xl bg-white px-3 py-3">
+            <p className="text-3xl font-medium tracking-tight">
+              {adherence === null ? "—" : pct(adherence, 0)}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              of activities had every recommended prerequisite
+            </p>
           </div>
-        </div>
-
-        <OffPlaybookPanel
-          items={offPlaybook}
-          period={windowLower}
-          onOpen={(query) => open("explorer", { q: query })}
-        />
-      </section>
-
-      <PlaySignalSection analysis={analysis} details={details} />
-
-      <section className="mt-5 rounded-2xl bg-white">
-        <div className="px-3 pt-3">
-          <h2 className="font-heading text-xl">Sales play performance</h2>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            How each defined play performed in the {windowLower}. Open a play for its recommended
-            prerequisites and success criteria.
-          </p>
-        </div>
-        <div className="mt-1 overflow-x-auto">
-          <PlayPerformanceTable
-            plays={analysis.plays}
-            onPlayClick={(playId) => open("play", { playId })}
-          />
+          <div className="rounded-2xl bg-white px-3 py-3">
+            <p className="text-3xl font-medium tracking-tight">
+              {lift === null ? "—" : `${percentPoints(lift, 0)}%`}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {lift === null
+                ? `No supported win-rate comparison`
+                : `higher win rate when recommended prerequisites were present`}
+            </p>
+          </div>
+          <div className="rounded-2xl bg-white px-3 py-3">
+            <p className="text-3xl font-medium tracking-tight">{formatCount(analysis.totals.activities)}</p>
+            <p className="mt-1 text-xs text-muted-foreground">activities logged</p>
+          </div>
         </div>
       </section>
 
@@ -280,6 +207,24 @@ export function ScribeHome({
             least one missing.
           </p>
           <OutcomeChart analysis={analysis} />
+        </div>
+      </section>
+
+      <PlaySignalSection analysis={analysis} details={details} />
+
+      <section className="mt-5 rounded-2xl bg-white">
+        <div className="px-3 pt-3">
+          <h2 className="font-heading text-xl">Sales play performance</h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            How each defined play performed in the {windowLower}. Open a play for its recommended
+            prerequisites and success criteria.
+          </p>
+        </div>
+        <div className="mt-1 overflow-x-auto">
+          <PlayPerformanceTable
+            plays={analysis.plays}
+            onPlayClick={(playId) => open("play", { playId })}
+          />
         </div>
       </section>
 
@@ -314,6 +259,14 @@ export function ScribeHome({
 
       {initialModal === "play" && selectedPlay ? (
         <PlayModal play={selectedPlay} detail={details[selectedPlay.id]} onClose={close} />
+      ) : null}
+      {initialModal === "offbook" ? (
+        <OffPlaybookModal
+          items={offPlaybook}
+          period={windowLower}
+          onClose={close}
+          onOpen={(query) => open("explorer", { q: query })}
+        />
       ) : null}
       {initialModal === "add" ? <AddPlayModal onClose={close} /> : null}
       {initialModal === "explorer" ? (
