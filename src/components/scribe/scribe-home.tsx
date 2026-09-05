@@ -124,7 +124,7 @@ export function ScribeHome({
   return (
     <div>
       <header className="sticky top-0 z-40 flex h-14 items-stretch gap-3 border-b border-border/80 bg-[#f7f7f5] px-3 md:px-5">
-        <AppNav current="playbook-iteration" />
+        <AppNav current="playbook-execution" />
         <div className="ml-auto flex shrink-0 items-center justify-end gap-2">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs ring-1 ring-[#2B2A27]/10">
             <span className="size-2 rounded-full bg-[#D9893A]" />
