@@ -89,7 +89,7 @@ function pickGong(prerequisites: PrerequisiteFinding[], usedKey?: string): LookC
     id: `gong-${item.playId}-${item.key}`,
     kind: "gong",
     label: "Gong",
-    body: `From Gong, most ${item.playName} activities that closed as wins had “${item.text}” on the activity.`,
+    body: `From Gong, won ${item.playName} activities usually had “${item.text}.”`,
     href: `/?modal=play&playId=${item.playId}`,
     playId: item.playId,
     prerequisiteKey: item.key,
@@ -119,7 +119,7 @@ function pickDefine(activities: AnalysisActivity[], asOf: Date): LookCloserItem 
     byPerson.set(row.seName, (byPerson.get(row.seName) ?? 0) + 1)
   }
   const leader = [...byPerson.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]
-  const lead = leader ? ` ${leader[0]} has done the most — a natural person to help standardize it.` : ""
+  const lead = leader ? ` ${leader[0]} has done the most — a natural owner to standardize it.` : ""
   return {
     id: `define-${name}`,
     kind: "define",
