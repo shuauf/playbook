@@ -197,8 +197,8 @@ export function ScribeHome({
 
       <div className="pl-14 lg:pl-56">
         <div className="mx-auto w-full max-w-[1320px] px-4 pb-8 pt-5 md:px-6">
-      <section className="grid gap-3 lg:grid-cols-12 lg:items-start">
-        <div className="lg:col-span-7">
+      <section className="grid gap-3 lg:grid-cols-[minmax(0,38rem)_minmax(22rem,1fr)] lg:items-start">
+        <div>
           <h2 className="font-heading text-xl leading-tight">Management view</h2>
           <p className="mt-0.5 max-w-md text-xs text-muted-foreground">
             Snapshot of defined-play activity in the {windowLower}.
@@ -230,13 +230,11 @@ export function ScribeHome({
             </div>
           </div>
         </div>
-        <div className="lg:col-span-5 lg:pt-1">
-          <LookCloserCard
-            items={analysis.lookCloser}
-            period={windowLower}
-            onOpen={(href) => router.push(href)}
-          />
-        </div>
+        <LookCloserCard
+          items={analysis.lookCloser}
+          period={windowLower}
+          onOpen={(href) => router.push(href)}
+        />
       </section>
 
       <section className="mt-6 grid gap-3 xl:grid-cols-2">
