@@ -6,6 +6,7 @@ import type {
   AnalysisOpportunity,
   AnalysisSnapshot,
   CycleComparison,
+  PerformanceTrendPoint,
   PeriodWindow,
   PlayFinding,
   PrerequisiteFinding,
@@ -259,6 +260,70 @@ export function signalFrequencies(findings: PrerequisiteFinding[]) {
       metRate: item.unmetRate === null ? 0 : 1 - item.unmetRate,
     }))
     .sort((a, b) => a.metRate - b.metRate)
+}
+
+export function playPerformanceTrend(
+  snapshot: AnalysisSnapshot,
+  activities: AnalysisActivity[],
+  playId?: string
+): PerformanceTrendPoint[] {
+  const scoped = playId
+    ? activities.filter((activity) => activity.playId === playId)
+    : activities
+  const opportunities = new Map(snapshot.opportunities.map((item) => [item.id, item]))
+  const buckets = new Map<
+    string,
+    { sort: number; defined: number; exceptions: number; won: number; lost: number; cycles: number[] }
+  >()
+
+  function bucket(date: Date) {
+    const sort = date.getFullYear() * 12 + date.getMonth()
+    const label = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`
+    const existing = buckets.get(label)
+    if (existing) return existing
+    const created = { sort, defined: 0, exceptions: 0, won: 0, lost: 0, cycles: [] as number[] }
+    buckets.set(label, created)
+    return created
+  }
+
+  for (const activity of scoped) {
+    const month = bucket(activity.activityDate)
+    if (activity.captureKind !== "defined") continue
+    month.defined += 1
+    if (activityHasException(activity)) month.exceptions += 1
+  }
+
+  const counted = new Set<string>()
+  for (const activity of scoped) {
+    const opportunity = opportunities.get(activity.opportunityId)
+    if (!opportunity || !opportunity.closeDate) continue
+    if (opportunity.outcome !== "won" && opportunity.outcome !== "lost") continue
+    if (counted.has(opportunity.id)) continue
+    counted.add(opportunity.id)
+    const month = bucket(opportunity.closeDate)
+    if (opportunity.outcome === "won") {
+      month.won += 1
+      const days = cycleDays(opportunity)
+      if (days !== null) month.cycles.push(days)
+    } else {
+      month.lost += 1
+    }
+  }
+
+  return [...buckets.entries()]
+    .sort((a, b) => a[1].sort - b[1].sort)
+    .slice(-6)
+    .map(([label, month]) => {
+      const closed = month.won + month.lost
+      return {
+        label,
+        winRate: closed === 0 ? null : month.won / closed,
+        exceptionRate: month.defined === 0 ? null : month.exceptions / month.defined,
+        cycleDays: month.cycles.length === 0 ? null : median(month.cycles),
+        closedCount: closed,
+        definedCount: month.defined,
+      }
+    })
 }
 
 export function signalTrend(activities: AnalysisActivity[]) {

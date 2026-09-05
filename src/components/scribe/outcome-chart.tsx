@@ -111,7 +111,7 @@ export function OutcomeChart({ analysis }: { analysis: HealthAnalysis }) {
 
   return (
     <div>
-      <div className="mb-4 flex flex-wrap items-center gap-2">
+      <div className="mb-2 flex flex-wrap items-center gap-2">
         <Toggle
           value={slice}
           onChange={setSlice}
@@ -130,7 +130,7 @@ export function OutcomeChart({ analysis }: { analysis: HealthAnalysis }) {
         />
       </div>
       {slice === "signal" ? (
-        <div className="mb-4">
+        <div className="mb-2">
           <p className="mb-1.5 text-[11px] text-muted-foreground">Sales play</p>
           <PlayPick
             plays={playOptions.map((play) => ({ id: play.playId, name: play.playName }))}

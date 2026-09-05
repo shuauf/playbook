@@ -103,6 +103,14 @@ describe("analysis engine", () => {
     expect(problem?.cycle.unmetDays).toBeGreaterThan(0)
     expect(allTime.signalFrequencies.some((item) => item.key === "demo-problem")).toBe(true)
     expect(allTime.signalTrend.length).toBeGreaterThan(0)
+    expect(allTime.performanceTrend.length).toBeGreaterThan(0)
+    expect(allTime.performanceTrend.some((point) => point.winRate !== null || point.exceptionRate !== null)).toBe(
+      true
+    )
+    expect(Object.keys(allTime.performanceTrendByPlay)).toEqual(
+      expect.arrayContaining(DEMO_PLAYS.map((play) => play.id))
+    )
+    expect(allTime.hygiene.some((item) => item.kind === "undefined")).toBe(true)
   })
 
   it("uses won opportunities only for cycle-time comparison", () => {

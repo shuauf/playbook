@@ -111,7 +111,7 @@ export async function getWorkspaceStatus(): Promise<WorkspaceStatus> {
   })
 
   return {
-    productName: "Scribe Optimize",
+    productName: "Playbook",
     workspaceName: meta.get("workspace_name") ?? "Workspace",
     persistence: persistenceCaption(connection),
     isDemo: meta.get("data_source") === "demo",

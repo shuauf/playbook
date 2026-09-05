@@ -50,6 +50,15 @@ export function daysUntil(isoDate: string, asOf = new Date()) {
   return daysBetween(asOf, new Date(`${isoDate}T00:00:00`))
 }
 
+export const PLAY_REVIEW_CADENCE_DAYS = 90
+
+/** Full ring = review is imminent. Empty ring = a full cadence remains. */
+export function hygieneUrgencyFill(daysLeft: number, cadenceDays = PLAY_REVIEW_CADENCE_DAYS) {
+  if (daysLeft <= 0) return 100
+  if (daysLeft >= cadenceDays) return 0
+  return Math.round((1 - daysLeft / cadenceDays) * 100)
+}
+
 export function addDays(date: Date, days: number) {
   const next = new Date(date)
   next.setDate(next.getDate() + days)

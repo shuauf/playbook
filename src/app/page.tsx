@@ -17,6 +17,15 @@ function first(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value
 }
 
+function latest(dates: Array<Date | null | undefined>) {
+  let max: Date | null = null
+  for (const date of dates) {
+    if (!date) continue
+    if (!max || date > max) max = date
+  }
+  return max
+}
+
 export default async function HomePage({
   searchParams,
 }: {
@@ -32,6 +41,11 @@ export default async function HomePage({
   ])
   const filters = parseHealthFilters(params)
   const analysis = analyzeHealth(snapshot, filters, new Date())
+  const gongAt = latest(snapshot.activities.map((item) => item.activityDate)) ?? new Date()
+  const salesforceAt =
+    latest(
+      snapshot.opportunities.flatMap((item) => [item.closeDate, item.createdAt])
+    ) ?? gongAt
 
   return (
     <ScribeHome
@@ -44,6 +58,11 @@ export default async function HomePage({
       initialModal={first(params.modal)}
       initialPlayId={first(params.playId)}
       initialOpportunityId={first(params.opportunityId)}
+      initialQuery={first(params.q)}
+      sync={{
+        gongAt: gongAt.toISOString(),
+        salesforceAt: salesforceAt.toISOString(),
+      }}
     />
   )
 }

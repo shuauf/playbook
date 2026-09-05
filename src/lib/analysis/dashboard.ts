@@ -6,6 +6,7 @@ import {
   playFindings,
   portfolioStats,
   prerequisiteFindings,
+  playPerformanceTrend,
   signalFrequencies,
   signalTrend,
   stackingBuckets,
@@ -136,6 +137,10 @@ export function analyzeHealth(
     prerequisites,
     signalFrequencies: signalFrequencies(prerequisites),
     signalTrend: signalTrend(activities),
+    performanceTrend: playPerformanceTrend(snapshot, activities),
+    performanceTrendByPlay: Object.fromEntries(
+      snapshot.plays.map((play) => [play.id, playPerformanceTrend(snapshot, activities, play.id)])
+    ),
     stacking,
     stackingUseful,
     actions,

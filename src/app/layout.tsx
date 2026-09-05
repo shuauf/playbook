@@ -23,7 +23,7 @@ const sourceSerif = Source_Serif_4({
 })
 
 export const metadata: Metadata = {
-  title: "Scribe Optimize",
+  title: "Playbook",
   description: "See exactly what's happening in the playbook. Know exactly what to fix.",
 }
 

@@ -105,6 +105,15 @@ export type SignalTrendPoint = {
   metRate: number
 }
 
+export type PerformanceTrendPoint = {
+  label: string
+  winRate: number | null
+  exceptionRate: number | null
+  cycleDays: number | null
+  closedCount: number
+  definedCount: number
+}
+
 export type StackingBucket = {
   key: "none" | "one" | "twoPlus"
   label: string
@@ -160,6 +169,8 @@ export type HealthAnalysis = {
   prerequisites: PrerequisiteFinding[]
   signalFrequencies: SignalFrequency[]
   signalTrend: SignalTrendPoint[]
+  performanceTrend: PerformanceTrendPoint[]
+  performanceTrendByPlay: Record<string, PerformanceTrendPoint[]>
   stacking: StackingBucket[]
   stackingUseful: boolean
   actions: ActionItem[]
