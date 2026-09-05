@@ -19,7 +19,7 @@ describe("cycle time formatting", () => {
     expect(formatCycle(12)).toBe("12 days")
     expect(formatCycle(210)).toBe("6.9 months")
     expect(formatCycle(278)).toBe("9.1 months")
-    expect(formatCycleDelta(36)).toBe("36 days slower")
+    expect(formatCycleDelta(36)).toBe("1.2 months slower")
     expect(formatCycleDelta(-62)).toBe("2 months faster")
   })
 })

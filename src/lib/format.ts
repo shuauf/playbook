@@ -45,7 +45,7 @@ const DAYS_PER_MONTH = 30.44
 export function formatCycle(days: number | null) {
   if (days === null || Number.isNaN(days)) return "—"
   const months = Math.abs(days) / DAYS_PER_MONTH
-  if (months < 1.5) return formatDays(Math.abs(days))
+  if (months < 1) return formatDays(Math.abs(days))
   const rounded = months >= 10 ? Math.round(months) : Math.round(months * 10) / 10
   return `${rounded} month${rounded === 1 ? "" : "s"}`
 }
