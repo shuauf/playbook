@@ -156,6 +156,16 @@ describe("analysis engine", () => {
     const architecture = current.plays.find((item) => item.playId === "play-architecture-review")
     expect(lift).not.toBeNull()
     expect(lift).not.toBe(architecture?.win.difference)
+    expect(current.lookCloser.length).toBeGreaterThanOrEqual(2)
+    expect(current.lookCloser.length).toBeLessThanOrEqual(3)
+    expect(current.lookCloser.some((item) => item.kind === "gap" && item.body.includes("Product Demo"))).toBe(
+      true
+    )
+    expect(current.lookCloser.some((item) => item.kind === "gong")).toBe(true)
+    expect(current.lookCloser.some((item) => item.kind === "define" && item.body.includes("Executive workflow audit"))).toBe(
+      true
+    )
+    expect(current.lookCloser.every((item) => !/\bcalls?\b/i.test(item.body))).toBe(true)
   })
 
   it("ranks deterministic actions from the planted story", () => {

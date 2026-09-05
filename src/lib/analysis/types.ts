@@ -124,6 +124,16 @@ export type StackingBucket = {
   wonCount: number
 }
 
+export type LookCloserItem = {
+  id: string
+  kind: "gap" | "gong" | "define"
+  label: string
+  body: string
+  href: string
+  playId?: string
+  prerequisiteKey?: string
+}
+
 export type ActionItem = {
   id: string
   classification: ActionClass
@@ -174,6 +184,7 @@ export type HealthAnalysis = {
   stacking: StackingBucket[]
   stackingUseful: boolean
   actions: ActionItem[]
+  lookCloser: LookCloserItem[]
   hygiene: HygieneIssue[]
   totals: {
     activities: number

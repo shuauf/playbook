@@ -14,6 +14,7 @@ import {
 import { hygieneIssues } from "@/lib/analysis/hygiene"
 import { periodWindow, priorWindow } from "@/lib/analysis/period"
 import { assemblePulse } from "@/lib/analysis/pulse"
+import { recommendLookCloser } from "@/lib/analysis/recommendations"
 import type {
   AnalysisSnapshot,
   HealthAnalysis,
@@ -144,6 +145,7 @@ export function analyzeHealth(
     stacking,
     stackingUseful,
     actions,
+    lookCloser: recommendLookCloser({ prerequisites, activities, asOf }),
     hygiene,
     totals: {
       activities: current.activities,
