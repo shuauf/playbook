@@ -64,7 +64,7 @@ function LookCloserCard({
   onOpen: (href: string) => void
 }) {
   return (
-    <aside className="flex h-full flex-col rounded-2xl bg-[#2B2A27] px-4 py-3 text-[#f3f2ee]">
+    <aside className="rounded-2xl bg-[#2B2A27] px-4 py-3 text-[#f3f2ee]">
       <h2 className="font-heading text-xl leading-tight text-[#f3f2ee]">AI Observations</h2>
       <p className="mt-0.5 text-xs text-white/55">
         Patterns worth checking from logged activity and Gong in the {period}.
@@ -197,47 +197,49 @@ export function ScribeHome({
 
       <div className="pl-14 lg:pl-56">
         <div className="mx-auto w-full max-w-[1320px] px-4 pb-8 pt-5 md:px-6">
-      <section className="grid items-stretch gap-3 lg:grid-cols-2">
-        <div className="rounded-2xl bg-white px-4 py-3">
+      <section className="grid gap-3 lg:grid-cols-12 lg:items-start">
+        <div className="lg:col-span-7">
           <h2 className="font-heading text-xl leading-tight">Management view</h2>
-          <p className="mt-0.5 text-xs text-muted-foreground">
+          <p className="mt-0.5 max-w-md text-xs text-muted-foreground">
             Snapshot of defined-play activity in the {windowLower}.
           </p>
-          <div className="mt-3 divide-y divide-border">
-            <div className="flex items-baseline gap-4 py-2.5 first:pt-0">
-              <p className="w-[4.75rem] shrink-0 text-3xl font-medium tracking-tight tabular-nums">
+          <div className="mt-2 grid grid-cols-3 gap-2">
+            <div className="rounded-2xl bg-white px-3 py-3">
+              <p className="text-3xl font-medium tracking-tight tabular-nums">
                 {adherence === null ? "—" : pct(adherence, 0)}
               </p>
-              <p className="text-xs leading-snug text-muted-foreground">
+              <p className="mt-1 text-xs leading-snug text-muted-foreground">
                 of activities had every recommended prerequisite
               </p>
             </div>
-            <div className="flex items-baseline gap-4 py-2.5">
-              <p className="w-[4.75rem] shrink-0 text-3xl font-medium tracking-tight tabular-nums">
+            <div className="rounded-2xl bg-white px-3 py-3">
+              <p className="text-3xl font-medium tracking-tight tabular-nums">
                 {lift === null ? "—" : `${percentPoints(lift, 0)}%`}
               </p>
-              <p className="text-xs leading-snug text-muted-foreground">
+              <p className="mt-1 text-xs leading-snug text-muted-foreground">
                 {lift === null
                   ? `No supported win-rate comparison`
                   : `higher win rate when recommended prerequisites were present`}
               </p>
             </div>
-            <div className="flex items-baseline gap-4 py-2.5 last:pb-0">
-              <p className="w-[4.75rem] shrink-0 text-3xl font-medium tracking-tight tabular-nums">
+            <div className="rounded-2xl bg-white px-3 py-3">
+              <p className="text-3xl font-medium tracking-tight tabular-nums">
                 {formatCount(analysis.totals.activities)}
               </p>
-              <p className="text-xs leading-snug text-muted-foreground">activities logged</p>
+              <p className="mt-1 text-xs leading-snug text-muted-foreground">activities logged</p>
             </div>
           </div>
         </div>
-        <LookCloserCard
-          items={analysis.lookCloser}
-          period={windowLower}
-          onOpen={(href) => router.push(href)}
-        />
+        <div className="lg:col-span-5 lg:pt-1">
+          <LookCloserCard
+            items={analysis.lookCloser}
+            period={windowLower}
+            onOpen={(href) => router.push(href)}
+          />
+        </div>
       </section>
 
-      <section className="mt-5 grid gap-3 xl:grid-cols-2">
+      <section className="mt-6 grid gap-3 xl:grid-cols-2">
         <div className="rounded-2xl bg-white p-3">
           <h2 className="font-heading text-xl">Performance over time</h2>
           <p className="mb-2 text-xs text-muted-foreground">
