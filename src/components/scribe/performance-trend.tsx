@@ -105,15 +105,16 @@ export function PerformanceTrendChart({ analysis }: { analysis: HealthAnalysis }
           {path ? <path d={path} fill="none" stroke="#2B2A27" strokeWidth="2" /> : null}
           {points.map((point, index) => {
             const raw = values[index]
-            if (raw === null) return null
             const tip =
-              metric === "cycleDays"
-                ? formatDays(raw)
-                : pct(raw)
+              raw === null
+                ? "No closed deals this month"
+                : metric === "cycleDays"
+                  ? formatDays(raw)
+                  : pct(raw)
             return (
               <g key={point.label}>
                 <title>{`${monthLabel(point.label)}: ${tip}`}</title>
-                <circle cx={xs[index]} cy={y(raw)} r="3" fill="#D9893A" />
+                {raw === null ? null : <circle cx={xs[index]} cy={y(raw)} r="3" fill="#D9893A" />}
                 <text x={xs[index]} y={height - 6} textAnchor="middle" className="fill-muted-foreground" fontSize="9">
                   {monthLabel(point.label)}
                 </text>
