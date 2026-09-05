@@ -86,7 +86,8 @@ export function PlaySignalSection({
         <div className="rounded-2xl bg-white p-3">
           <h2 className="font-heading text-xl">Recommended prerequisites</h2>
           <p className="mb-2 text-xs text-muted-foreground">
-            Share of calls where each recommended prerequisite was present.
+            Each bar is the share of calls where that recommended prerequisite was present on the
+            call. This is presence, not win rate.
           </p>
           <FrequencyBars
             rows={signalRows}

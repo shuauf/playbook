@@ -11,7 +11,7 @@ import { formatIsoDate } from "@/lib/dates"
 import { PIPELINE_STAGES, type PrerequisiteStatus } from "@/lib/domain/types"
 import type { ExplorerActivity, ExplorerOpportunity } from "@/lib/explorer/types"
 import { matchesSearch, prerequisiteRollupLabel } from "@/lib/explorer/search"
-import { recordActivityAction, savePlayAction } from "@/lib/playbook/actions"
+import { createPlayAction, recordActivityAction, savePlayAction } from "@/lib/playbook/actions"
 import type { PlayDetail } from "@/lib/db/catalog"
 import { cn } from "@/lib/utils"
 
@@ -280,6 +280,101 @@ export function PlayModal({
       <div className="mt-4">
         <Button onClick={submit} disabled={pending}>
           Save new version
+        </Button>
+      </div>
+    </ModalShell>
+  )
+}
+
+export function AddPlayModal({ onClose }: { onClose: () => void }) {
+  const router = useRouter()
+  const [pending, startTransition] = useTransition()
+  const [name, setName] = useState("")
+  const [description, setDescription] = useState("")
+  const [prerequisites, setPrerequisites] = useState([{ text: "" }])
+  const [error, setError] = useState<string | null>(null)
+
+  function submit() {
+    setError(null)
+    startTransition(async () => {
+      const result = await createPlayAction({
+        name,
+        description,
+        typicalStages: [],
+        prerequisites: prerequisites.filter((item) => item.text.trim()),
+      })
+      if (!result.ok) {
+        setError(result.error)
+        return
+      }
+      router.push(`/?modal=play&playId=${result.id}`)
+      router.refresh()
+    })
+  }
+
+  return (
+    <ModalShell title="Add play" subtitle="Define a play, then add recommended prerequisites." onClose={onClose}>
+      <div className="grid gap-2">
+        <Label htmlFor="new-play-name">Name</Label>
+        <Input id="new-play-name" value={name} onChange={(event) => setName(event.target.value)} />
+      </div>
+      <div className="mt-3 grid gap-2">
+        <Label htmlFor="new-play-description">Description</Label>
+        <Textarea
+          id="new-play-description"
+          value={description}
+          onChange={(event) => setDescription(event.target.value)}
+        />
+      </div>
+      <div className="mt-5 rounded-2xl border border-border p-3">
+        <div className="mb-2 flex items-center justify-between">
+          <div>
+            <Label>Recommended prerequisites</Label>
+            <p className="text-[11px] text-muted-foreground">
+              Things we believe make the play likely to succeed — not requirements to gate on.
+            </p>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setPrerequisites((current) => [...current, { text: "" }])}
+          >
+            Add prerequisite
+          </Button>
+        </div>
+        <ol className="space-y-2">
+          {prerequisites.map((item, index) => (
+            <li key={index} className="flex items-start gap-2">
+              <Input
+                value={item.text}
+                onChange={(event) =>
+                  setPrerequisites((current) =>
+                    current.map((entry, entryIndex) =>
+                      entryIndex === index ? { text: event.target.value } : entry
+                    )
+                  )
+                }
+                placeholder="The business problem is understood"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                onClick={() =>
+                  setPrerequisites((current) => current.filter((_, entryIndex) => entryIndex !== index))
+                }
+              >
+                ×
+              </Button>
+            </li>
+          ))}
+        </ol>
+      </div>
+      {error ? <p className="mt-3 text-sm text-destructive">{error}</p> : null}
+      <div className="mt-4">
+        <Button onClick={submit} disabled={pending}>
+          Create play
         </Button>
       </div>
     </ModalShell>
