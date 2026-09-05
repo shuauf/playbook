@@ -342,6 +342,7 @@ export async function listExplorerData(inputDb?: PlaybookDb): Promise<{
         stageAtActivity: row.stageAtActivity,
         seName: row.seName,
         team: opportunity?.team ?? "",
+        segment: row.segment || opportunity?.segment || "",
         outcome: opportunity?.outcome ?? "",
         captureKind: row.captureKind as "defined" | "undefined",
         ...snapshotRollup(row.captureKind, snapshots),

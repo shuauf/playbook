@@ -40,6 +40,28 @@ export function formatDays(days: number | null) {
   return `${rounded} day${rounded === 1 ? "" : "s"}`
 }
 
+const DAYS_PER_MONTH = 30.44
+
+export function formatCycle(days: number | null) {
+  if (days === null || Number.isNaN(days)) return "—"
+  const months = Math.abs(days) / DAYS_PER_MONTH
+  if (months < 1.5) return formatDays(Math.abs(days))
+  const rounded = months >= 10 ? Math.round(months) : Math.round(months * 10) / 10
+  return `${rounded} month${rounded === 1 ? "" : "s"}`
+}
+
+export function formatCycleDelta(days: number | null) {
+  if (days === null || Number.isNaN(days)) return "—"
+  if (Math.round(days) === 0) return "about the same"
+  return `${formatCycle(Math.abs(days))} ${days > 0 ? "slower" : "faster"}`
+}
+
+export function formatCycleSigned(days: number | null) {
+  if (days === null || Number.isNaN(days)) return null
+  if (Math.round(days) === 0) return "unchanged"
+  return `${days > 0 ? "+" : "−"}${formatCycle(Math.abs(days))}`
+}
+
 export function formatRelativeAgo(date: Date, asOf = new Date()) {
   const deltaMs = asOf.getTime() - date.getTime()
   if (Number.isNaN(deltaMs) || deltaMs < 0) return "just now"

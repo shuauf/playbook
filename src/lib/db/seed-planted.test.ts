@@ -25,9 +25,32 @@ describe("planted development dataset", () => {
       .filter((row) => row.opp && row.opp.outcome !== "open")
   }
 
-  it("plants hundreds of opportunities and activities", () => {
+  it("plants a compact workspace of about 100 opportunities and 250 activities", () => {
     expect(planted.opportunities.length).toBeGreaterThanOrEqual(SEED_CONTRACT.minOpportunities)
+    expect(planted.opportunities.length).toBeLessThanOrEqual(SEED_CONTRACT.maxOpportunities)
     expect(planted.activities.length).toBeGreaterThanOrEqual(SEED_CONTRACT.minActivities)
+    expect(planted.activities.length).toBeLessThanOrEqual(SEED_CONTRACT.maxActivities)
+  })
+
+  it("tags every opportunity and activity with a Scribe segment", () => {
+    const allowed = new Set(["Strategic", "Mid-Market", "SMB"])
+    expect(planted.opportunities.every((item) => allowed.has(item.segment))).toBe(true)
+    expect(planted.activities.every((item) => allowed.has(item.segment))).toBe(true)
+    expect(new Set(planted.opportunities.map((item) => item.segment)).size).toBe(3)
+    expect(new Set(planted.activities.map((item) => item.segment)).size).toBe(3)
+  })
+
+  it("keeps most closed Optimize cycles at six months or longer", () => {
+    const closed = planted.opportunities.filter((item) => item.closeDate)
+    const long = closed.filter((item) => {
+      const days = (item.closeDate!.getTime() - item.createdAt.getTime()) / 86_400_000
+      return days >= 180
+    })
+    expect(long.length / closed.length).toBeGreaterThan(0.85)
+    const median = closed
+      .map((item) => (item.closeDate!.getTime() - item.createdAt.getTime()) / 86_400_000)
+      .sort((a, b) => a - b)
+    expect(median[Math.floor(median.length / 2)]).toBeGreaterThanOrEqual(180)
   })
 
   it("plants a supported-size win-rate gap for the business-problem prerequisite", () => {
@@ -48,14 +71,28 @@ describe("planted development dataset", () => {
   })
 
   it("plants a frequently skipped prerequisite with little outcome difference", () => {
-    const pairs = closedDemoPairs()
+    const discovery = planted.activities.filter(
+      (item) => item.captureKind === "defined" && item.play?.id === "play-discovery"
+    )
+    const byOpp = new Map<string, typeof discovery>()
+    for (const activity of discovery) {
+      const list = byOpp.get(activity.opportunityId) ?? []
+      list.push(activity)
+      byOpp.set(activity.opportunityId, list)
+    }
+    const pairs = [...byOpp.entries()]
+      .map(([opportunityId, activities]) => ({
+        opp: planted.opportunities.find((item) => item.id === opportunityId),
+        activities,
+      }))
+      .filter((row) => row.opp && row.opp.outcome !== "open")
     const met = pairs.filter((row) =>
-      row.activities.every((activity) => activity.checks["demo-champion"] === "met")
+      row.activities.every((activity) => activity.checks["discovery-aligned"] === "met")
     )
     const unmet = pairs.filter((row) =>
-      row.activities.some((activity) => activity.checks["demo-champion"] === "not_met")
+      row.activities.some((activity) => activity.checks["discovery-aligned"] === "not_met")
     )
-    expect(unmet.length).toBeGreaterThan(80)
+    expect(unmet.length).toBeGreaterThan(15)
     const metWin = met.filter((row) => row.opp?.outcome === "won").length / met.length
     const unmetWin = unmet.filter((row) => row.opp?.outcome === "won").length / unmet.length
     expect(Math.abs(metWin - unmetWin)).toBeLessThan(0.08)

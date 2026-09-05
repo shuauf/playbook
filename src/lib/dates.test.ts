@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import { hygieneUrgencyFill } from "@/lib/dates"
-import { formatRelativeAgo } from "@/lib/format"
+import { formatCycle, formatCycleDelta, formatRelativeAgo } from "@/lib/format"
 
 describe("hygiene countdown ring", () => {
   it("fills as the review date approaches", () => {
@@ -11,6 +11,16 @@ describe("hygiene countdown ring", () => {
     expect(hygieneUrgencyFill(9)).toBe(90)
     expect(hygieneUrgencyFill(45)).toBe(50)
     expect(hygieneUrgencyFill(9)).toBeGreaterThan(hygieneUrgencyFill(80))
+  })
+})
+
+describe("cycle time formatting", () => {
+  it("uses months once a deal is longer than about six weeks", () => {
+    expect(formatCycle(12)).toBe("12 days")
+    expect(formatCycle(210)).toBe("6.9 months")
+    expect(formatCycle(278)).toBe("9.1 months")
+    expect(formatCycleDelta(36)).toBe("36 days slower")
+    expect(formatCycleDelta(-62)).toBe("2 months faster")
   })
 })
 

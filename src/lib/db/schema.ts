@@ -111,6 +111,7 @@ export const salesActivities = sqliteTable(
     stageAtActivity: text("stage_at_activity").notNull(),
     seName: text("se_name").notNull(),
     note: text("note"),
+    segment: text("segment").notNull(),
     source: text("source").notNull(),
     captureKind: text("capture_kind").notNull(),
     createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),

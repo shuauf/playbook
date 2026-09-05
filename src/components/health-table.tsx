@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react"
 
 import { ConfidenceBadge } from "@/components/confidence-badge"
-import { formatCount, pct, winRateCompare } from "@/lib/format"
+import { formatCount, formatCycleDelta, pct, winRateCompare } from "@/lib/format"
 import type { PlayFinding } from "@/lib/analysis/types"
 import {
   Table,
@@ -143,9 +143,7 @@ export function PlayPerformanceTable({
             <TableCell>
               {play.cycle.differenceDays === null
                 ? "—"
-                : play.cycle.differenceDays === 0
-                  ? "about the same"
-                  : `${Math.round(Math.abs(play.cycle.differenceDays))} days ${play.cycle.differenceDays > 0 ? "slower" : "faster"} when a prerequisite is missing`}
+                : `${formatCycleDelta(play.cycle.differenceDays)} when a prerequisite is missing`}
             </TableCell>
             <TableCell>
               <ConfidenceBadge level={play.win.confidence} />

@@ -78,6 +78,7 @@ export async function loadAnalysisSnapshot(inputDb?: PlaybookDb): Promise<Analys
         activityDate: row.activityDate,
         stageAtActivity: row.stageAtActivity,
         seName: row.seName,
+        segment: row.segment || "",
         evaluatedKeys: snaps.map((item) => item.prerequisiteKey),
         unmetKeys: snaps.filter((item) => item.status === "not_met").map((item) => item.prerequisiteKey),
         snapshotCount: snaps.length,

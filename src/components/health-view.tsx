@@ -10,7 +10,7 @@ import { HealthFiltersBar } from "@/components/health-filters"
 import { PlayPerformanceTable } from "@/components/health-table"
 import { MetricTip } from "@/components/metric-tip"
 import { Badge } from "@/components/ui/badge"
-import { formatCount, formatDays, pct } from "@/lib/format"
+import { formatCount, formatCycle, pct } from "@/lib/format"
 import type { HealthAnalysis } from "@/lib/analysis/types"
 import { cn } from "@/lib/utils"
 
@@ -147,7 +147,7 @@ export function HealthView({
                   closed win rate · {formatCount(bucket.closedCount)} opportunities
                 </p>
                 <p className="mt-2 text-sm">
-                  {formatDays(bucket.medianCycleDays)} median among {formatCount(bucket.wonCount)} wins
+                  {formatCycle(bucket.medianCycleDays)} median among {formatCount(bucket.wonCount)} wins
                 </p>
               </div>
             ))}

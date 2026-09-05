@@ -25,6 +25,7 @@ export type AnalysisActivity = {
   activityDate: Date
   stageAtActivity: string
   seName: string
+  segment: string
   evaluatedKeys: string[]
   unmetKeys: string[]
   snapshotCount: number

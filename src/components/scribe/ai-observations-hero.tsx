@@ -76,8 +76,7 @@ export function AiObservationsHero({
             The system found these patterns first
           </h2>
           <p className="mt-1.5 text-sm leading-relaxed text-white/60">
-            Pattern-finding across logged activity and Gong in the {period}. Three findings worth a
-            closer look before the rest of the page.
+            Pattern-finding across logged activity in the {period}.
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2 sm:pt-1">

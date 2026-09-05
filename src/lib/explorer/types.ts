@@ -26,6 +26,7 @@ export type ExplorerActivity = {
   stageAtActivity: string
   seName: string
   team: string
+  segment: string
   outcome: string
   captureKind: "defined" | "undefined"
   allPrerequisitesMet: boolean | null

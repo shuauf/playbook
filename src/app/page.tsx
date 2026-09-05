@@ -9,6 +9,8 @@ import {
   listPeople,
   listPlayDefinitions,
 } from "@/lib/playbook/queries"
+import type { HealthAnalysis } from "@/lib/analysis/types"
+import type { SegmentFilter } from "@/components/scribe/segment-toggle"
 
 export const dynamic = "force-dynamic"
 export const runtime = "nodejs"
@@ -40,7 +42,14 @@ export default async function HomePage({
     listOpportunityChoices(),
   ])
   const filters = parseHealthFilters(params)
-  const analysis = analyzeHealth(snapshot, filters, new Date())
+  const asOf = new Date()
+  const analysis = analyzeHealth(snapshot, { ...filters, segment: "all" }, asOf)
+  const segmentAnalyses = {
+    all: analysis,
+    Strategic: analyzeHealth(snapshot, { ...filters, segment: "Strategic" }, asOf),
+    "Mid-Market": analyzeHealth(snapshot, { ...filters, segment: "Mid-Market" }, asOf),
+    SMB: analyzeHealth(snapshot, { ...filters, segment: "SMB" }, asOf),
+  } satisfies Record<SegmentFilter, HealthAnalysis>
   const gongAt = latest(snapshot.activities.map((item) => item.activityDate)) ?? new Date()
   const salesforceAt =
     latest(
@@ -50,6 +59,7 @@ export default async function HomePage({
   return (
     <ScribeHome
       analysis={analysis}
+      segmentAnalyses={segmentAnalyses}
       plays={plays}
       details={PLAY_DETAIL}
       explorer={explorer}
