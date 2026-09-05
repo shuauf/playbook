@@ -61,6 +61,7 @@ export function filterActivities(
         row.playName,
         row.seName,
         row.team,
+        row.segment,
         row.stageAtActivity,
       ],
       filters.q

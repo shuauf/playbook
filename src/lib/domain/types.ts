@@ -28,7 +28,7 @@ export const PIPELINE_STAGES = [
 ] as const
 export type PipelineStage = (typeof PIPELINE_STAGES)[number]
 
-export const SEGMENTS = ["SMB", "Mid-market", "Enterprise"] as const
+export const SEGMENTS = ["Strategic", "Mid-Market", "SMB"] as const
 export type Segment = (typeof SEGMENTS)[number]
 
 export const TEAMS = ["West", "East", "Strategic"] as const

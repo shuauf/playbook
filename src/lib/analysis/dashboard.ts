@@ -1,4 +1,4 @@
-import { compactDelta, formatCount, formatDays, pct } from "@/lib/format"
+import { compactDelta, formatCount, formatCycle, formatCycleSigned, pct } from "@/lib/format"
 import { rankActions } from "@/lib/analysis/actions"
 import {
   filterActivities,
@@ -30,13 +30,6 @@ function metricDelta(current: number | null, prior: number | null) {
 function formatSignedPct(value: number | null) {
   if (value === null) return null
   return compactDelta(value, 0)
-}
-
-function formatSignedDays(value: number | null) {
-  if (value === null) return null
-  const rounded = Math.round(value)
-  if (rounded === 0) return "unchanged"
-  return `${rounded > 0 ? "+" : ""}${rounded}d`
 }
 
 export function analyzeHealth(
@@ -71,12 +64,12 @@ export function analyzeHealth(
     {
       id: "cycle",
       label: "Median won cycle",
-      value: formatDays(current.medianCycleDays),
+      value: formatCycle(current.medianCycleDays),
       raw: current.medianCycleDays,
       prior:
         prior?.medianCycleDays === null || prior === null
           ? null
-          : formatSignedDays(metricDelta(current.medianCycleDays, prior.medianCycleDays)),
+          : formatCycleSigned(metricDelta(current.medianCycleDays, prior.medianCycleDays)),
       delta: metricDelta(current.medianCycleDays, prior?.medianCycleDays ?? null),
       definition: "Median days from opportunity created date to close date for won opportunities only.",
       href: "/?modal=explorer",

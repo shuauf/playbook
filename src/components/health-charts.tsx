@@ -3,7 +3,7 @@
 import { useState } from "react"
 
 import { confidenceFill } from "@/components/confidence-badge"
-import { compactDelta, formatCount, formatDays, pct } from "@/lib/format"
+import { compactDelta, formatCount, formatCycle, formatCycleDelta, formatCycleSigned, pct } from "@/lib/format"
 import type { PlayFinding } from "@/lib/analysis/types"
 import type { ConfidenceLevel } from "@/lib/domain/types"
 
@@ -161,7 +161,7 @@ export function OutcomeDumbbell({
             ? "—"
             : metric === "winRate"
               ? compactDelta(row.difference, 0)
-              : `${row.difference > 0 ? "+" : ""}${Math.round(row.difference)}d`
+              : formatCycleSigned(row.difference) ?? "—"
         return (
           <div key={row.id}>
             <div className="mb-1 flex items-baseline justify-between gap-2 text-sm">
@@ -181,7 +181,7 @@ export function OutcomeDumbbell({
                 title={
                   metric === "winRate"
                     ? `Prerequisites present ${pct(followed)}`
-                    : `Prerequisites present ${formatDays(followed)}`
+                    : `Prerequisites present ${formatCycle(followed)}`
                 }
                 className={`absolute top-1/2 size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full ${
                   muted ? "border border-foreground/40 bg-card" : "bg-[#3D8B8B]"
@@ -192,7 +192,7 @@ export function OutcomeDumbbell({
                 title={
                   metric === "winRate"
                     ? `Prerequisites missing ${pct(exception)}`
-                    : `Prerequisites missing ${formatDays(exception)}`
+                    : `Prerequisites missing ${formatCycle(exception)}`
                 }
                 className={`absolute top-1/2 size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full ${
                   muted ? "border border-foreground/30 bg-card" : "bg-[#D9893A]"
@@ -259,11 +259,11 @@ export function CycleDivergingBars({ plays }: { plays: PlayFinding[] }) {
                     width: `${width}%`,
                     left: days >= 0 ? "50%" : `${50 - width}%`,
                   }}
-                  title={`${formatDays(Math.abs(days))} ${days >= 0 ? "slower" : "faster"}`}
+                  title={formatCycleDelta(days)}
                 />
               </div>
               <span className="text-right text-xs text-muted-foreground">
-                {days === 0 ? "no difference" : `${Math.round(Math.abs(days))} days ${days > 0 ? "slower" : "faster"}`}
+                {days === 0 ? "no difference" : formatCycleDelta(days)}
               </span>
             </div>
           )

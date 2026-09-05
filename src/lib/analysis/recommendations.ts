@@ -162,7 +162,7 @@ function pickDefine(activities: AnalysisActivity[], asOf: Date): LookCloserItem 
     detail.push(
       { type: "text", value: " " },
       { type: "person", value: leader[0] },
-      { type: "text", value: " has done the most — a natural owner to standardize it." }
+      { type: "text", value: " has done the most." }
     )
   }
   return observation({

@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react"
 
 import { PlayPick } from "@/components/scribe/play-pick"
-import { formatDays, pct, periodTitleLower } from "@/lib/format"
+import { formatCycle, pct, periodTitleLower } from "@/lib/format"
 import type { HealthAnalysis, PerformanceTrendPoint } from "@/lib/analysis/types"
 import { cn } from "@/lib/utils"
 
@@ -35,10 +35,10 @@ export function PerformanceTrendChart({ analysis }: { analysis: HealthAnalysis }
     return point.cycleDays
   })
   const numeric = values.filter((value): value is number => value !== null)
-  const max = metric === "cycleDays" ? Math.max(30, ...numeric, 1) : 1
+  const max = metric === "cycleDays" ? Math.max(180, ...numeric, 1) : 1
   const width = 420
   const height = 168
-  const pad = { l: 32, r: 10, t: 12, b: 24 }
+  const pad = { l: metric === "cycleDays" ? 44 : 32, r: 10, t: 12, b: 24 }
   const xs = points.map((_, index) => pad.l + (index / Math.max(points.length - 1, 1)) * (width - pad.l - pad.r))
   const y = (value: number) => pad.t + (1 - value / max) * (height - pad.t - pad.b)
   const path = points
@@ -88,7 +88,7 @@ export function PerformanceTrendChart({ analysis }: { analysis: HealthAnalysis }
         <PlayPick plays={playOptions} value={playId} onChange={setPlayId} />
       </div>
       <p className="mb-2 text-[11px] text-muted-foreground">
-        {labels[metric]} over the {period}, computed from closed deals and logged activities — not a snapshot.
+        {labels[metric]} over the {period}, computed from closed deals and logged activities.
       </p>
       {points.length === 0 ? (
         <p className="text-sm text-muted-foreground">Not enough dated activity to draw a trend yet.</p>
@@ -98,7 +98,7 @@ export function PerformanceTrendChart({ analysis }: { analysis: HealthAnalysis }
             <g key={tick}>
               <line x1={pad.l} x2={width - pad.r} y1={y(tick * max)} y2={y(tick * max)} stroke="#EBEDF1" />
               <text x={2} y={y(tick * max) + 3} className="fill-muted-foreground" fontSize="9">
-                {metric === "cycleDays" ? Math.round(tick * max) : Math.round(tick * 100)}
+                {metric === "cycleDays" ? formatCycle(tick * max).replace(" months", " mo") : Math.round(tick * 100)}
               </text>
             </g>
           ))}
@@ -109,7 +109,7 @@ export function PerformanceTrendChart({ analysis }: { analysis: HealthAnalysis }
               raw === null
                 ? "No closed deals this month"
                 : metric === "cycleDays"
-                  ? formatDays(raw)
+                  ? formatCycle(raw)
                   : pct(raw)
             return (
               <g key={point.label}>

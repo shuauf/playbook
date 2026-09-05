@@ -33,7 +33,10 @@ export function matchesActivityFilters(
     }
   }
   if (filters.stage !== "all" && activity.stageAtActivity !== filters.stage) return false
-  if (filters.segment !== "all" && opportunity.segment !== filters.segment) return false
+  if (filters.segment !== "all") {
+    const segment = activity.segment || opportunity.segment
+    if (segment !== filters.segment) return false
+  }
   if (filters.team !== "all" && opportunity.team !== filters.team) return false
   if (filters.se !== "all" && activity.seName !== filters.se) return false
   if (filters.outcome !== "all" && opportunity.outcome !== filters.outcome) return false

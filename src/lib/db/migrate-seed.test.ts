@@ -33,6 +33,33 @@ async function openTemp() {
 }
 
 describe("migrations and demo seed", () => {
+  it("adds a segment column to activities created by the original schema", async () => {
+    const dir = await mkdtemp(path.join(os.tmpdir(), "playbook-upgrade-"))
+    dirs.push(dir)
+    const file = path.join(dir, "playbook.sqlite")
+    const { createClient } = await import("@libsql/client")
+    const prior = createClient({ url: `file:${file}` })
+    const { MIGRATION_0001_SQL } = await import("@/lib/db/migrations/0001_init")
+    for (const statement of MIGRATION_0001_SQL.split(";").map((item) => item.trim()).filter(Boolean)) {
+      await prior.execute(statement)
+    }
+    await prior.execute({
+      sql: `INSERT INTO schema_migrations (id, applied_at) VALUES (?, ?)`,
+      args: ["0001_init", Date.now()],
+    })
+    prior.close()
+
+    const { db, client } = await openPlaybookDb(file)
+    try {
+      const columns = await client.execute(`PRAGMA table_info(sales_activities)`)
+      expect(columns.rows.map((row) => String(row.name))).toContain("segment")
+      const rows = await db.select().from(schemaMigrations)
+      expect(rows.map((row) => row.id)).toContain(CURRENT_SCHEMA_VERSION)
+    } finally {
+      client.close()
+    }
+  })
+
   it("applies the forward migration and records the schema version", async () => {
     const { db, client } = await openTemp()
     try {

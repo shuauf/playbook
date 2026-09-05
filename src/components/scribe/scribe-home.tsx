@@ -19,6 +19,7 @@ import {
 import { AiObservationsHero } from "@/components/scribe/ai-observations-hero"
 import { AppNav } from "@/components/scribe/app-nav"
 import { PlaySidebar } from "@/components/scribe/play-sidebar"
+import { SegmentToggle, type SegmentFilter } from "@/components/scribe/segment-toggle"
 import { PlaySignalSection } from "@/components/scribe/signal-charts"
 import { portfolioWinLift } from "@/lib/analysis/compute"
 import { daysUntil, hygieneUrgencyFill } from "@/lib/dates"
@@ -66,6 +67,7 @@ function hygieneCountdown(isoDate: string, asOf: Date) {
 
 export function ScribeHome({
   analysis,
+  segmentAnalyses,
   plays,
   details,
   explorer,
@@ -78,6 +80,7 @@ export function ScribeHome({
   sync,
 }: {
   analysis: HealthAnalysis
+  segmentAnalyses: Record<SegmentFilter, HealthAnalysis>
   plays: PlayDefinition[]
   details: Record<string, PlayDetail>
   explorer: { activities: ExplorerActivity[]; opportunities: ExplorerOpportunity[] }
@@ -91,7 +94,10 @@ export function ScribeHome({
 }) {
   const router = useRouter()
   const [playsOpen, setPlaysOpen] = useState(false)
+  const [segment, setSegment] = useState<SegmentFilter>("all")
+  const cards = segmentAnalyses[segment] ?? analysis
   const windowLower = periodTitleLower(analysis.filters.period)
+  const cardsWindow = periodTitleLower(cards.filters.period)
   const offPlaybook = analysis.hygiene.filter((item) => item.kind === "undefined")
   const adherence = analysis.totals.definedActivities
     ? 1 - analysis.totals.exceptionActivities / analysis.totals.definedActivities
@@ -173,21 +179,25 @@ export function ScribeHome({
         onLog={() => open("log")}
       />
 
-      <section className="mt-6 grid gap-3 xl:grid-cols-2">
+      <div className="mt-6">
+        <SegmentToggle value={segment} onChange={setSegment} />
+      </div>
+
+      <section className="mt-3 grid gap-3 xl:grid-cols-2">
         <div className="rounded-2xl bg-white p-3">
           <h2 className="font-heading text-xl">Performance over time</h2>
           <p className="mb-2 text-xs text-muted-foreground">
-            Win rate, exception rate, and cycle time across the {windowLower}.
+            Win rate, exception rate, and cycle time across the {cardsWindow}.
           </p>
-          <PerformanceTrendChart analysis={analysis} />
+          <PerformanceTrendChart analysis={cards} />
         </div>
         <div className="rounded-2xl bg-white p-3">
           <h2 className="font-heading text-xl">When plays are followed</h2>
           <p className="mb-2 text-xs text-muted-foreground">
-            Closed deals in the {windowLower}. Teal: every recommended prerequisite present. Amber: at
+            Closed deals in the {cardsWindow}. Teal: every recommended prerequisite present. Amber: at
             least one missing.
           </p>
-          <OutcomeChart analysis={analysis} />
+          <OutcomeChart analysis={cards} />
         </div>
       </section>
 
@@ -195,19 +205,19 @@ export function ScribeHome({
         <div className="px-3 pt-3">
           <h2 className="font-heading text-xl">Sales play performance</h2>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            How each defined play performed in the {windowLower}. Open a play for its recommended
+            How each defined play performed in the {cardsWindow}. Open a play for its recommended
             prerequisites and success criteria.
           </p>
         </div>
         <div className="mt-1 overflow-x-auto">
           <PlayPerformanceTable
-            plays={analysis.plays}
+            plays={cards.plays}
             onPlayClick={(playId) => open("play", { playId })}
           />
         </div>
       </section>
 
-      <PlaySignalSection analysis={analysis} details={details} />
+      <PlaySignalSection analysis={cards} details={details} />
 
       <section className="mt-5 rounded-2xl bg-[#2B2A27] px-3 py-3 text-[#f3f2ee]">
         <h2 className="font-heading text-xl">Play hygiene</h2>

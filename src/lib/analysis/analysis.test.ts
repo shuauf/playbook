@@ -46,6 +46,7 @@ function snapshotFromPlanted(): AnalysisSnapshot {
       activityDate: item.activityDate,
       stageAtActivity: item.stageAtActivity,
       seName: item.seName,
+      segment: item.segment,
       evaluatedKeys,
       unmetKeys: evaluatedKeys.filter((key) => item.checks[key] === "not_met"),
       snapshotCount: item.captureKind === "undefined" ? 0 : evaluatedKeys.length,
@@ -92,8 +93,8 @@ describe("analysis engine", () => {
 
   it("computes win rate from unique closed opportunity-play pairs", () => {
     const demo = allTime.plays.find((item) => item.playId === "play-product-demo")
-    expect(demo?.win.metN).toBeGreaterThanOrEqual(40)
-    expect(demo?.win.unmetN).toBeGreaterThanOrEqual(40)
+    expect(demo?.win.metN).toBeGreaterThanOrEqual(SEED_CONTRACT.enforceMetClosed)
+    expect(demo?.win.unmetN).toBeGreaterThanOrEqual(SEED_CONTRACT.enforceUnmetClosed)
     expect(demo?.win.difference).toBeGreaterThan(0.08)
     expect(demo?.win.confidence).toBe("supported")
     const problem = allTime.prerequisites.find((item) => item.key === "demo-problem")
@@ -133,7 +134,9 @@ describe("analysis engine", () => {
     expect((demo?.cycle.metN ?? 0) + (demo?.cycle.unmetN ?? 0)).toBe(
       SEED_CONTRACT.enforceMetWon + SEED_CONTRACT.enforceUnmetWon
     )
-    expect(demo?.cycle.differenceDays).toBeGreaterThan(10)
+    expect(demo?.cycle.metDays).toBeGreaterThanOrEqual(180)
+    expect(demo?.cycle.unmetDays).toBeGreaterThanOrEqual(180)
+    expect(demo?.cycle.differenceDays).toBeGreaterThan(15)
   })
 
   it("classifies confidence from sample size and significance", () => {
@@ -146,8 +149,10 @@ describe("analysis engine", () => {
   it("compares the current period against the immediately preceding window", () => {
     expect(current.priorWindow).toBeTruthy()
     expect(current.metrics.every((item) => item.value.length > 0)).toBe(true)
-    expect(current.totals.activities).toBeGreaterThan(200)
-    expect(current.totals.closedOpportunities).toBeGreaterThan(150)
+    expect(current.totals.activities).toBeGreaterThan(80)
+    expect(current.totals.closedOpportunities).toBeGreaterThan(40)
+    expect(snapshot.opportunities.length).toBeLessThanOrEqual(SEED_CONTRACT.maxOpportunities)
+    expect(snapshot.activities.length).toBeLessThanOrEqual(SEED_CONTRACT.maxActivities)
     const demo = current.plays.find((item) => item.playId === "play-product-demo")
     expect(demo?.win.confidence).toBe("supported")
     expect(demo?.win.difference).toBeGreaterThan(0.08)
@@ -197,6 +202,25 @@ describe("analysis engine", () => {
     expect(comparison.metN).toBe(closed.length)
     expect(open.length).toBeGreaterThan(0)
     expect(allTime.totals.closedOpportunities).toBeLessThan(snapshot.opportunities.length)
+  })
+
+  it("filters logged activities by the segment they carry", () => {
+    const window = periodWindow("all", SEED_AS_OF)
+    const strategic = filterActivities(
+      snapshot,
+      { ...DEFAULT_HEALTH_FILTERS, period: "all", segment: "Strategic" },
+      window
+    )
+    const midMarket = filterActivities(
+      snapshot,
+      { ...DEFAULT_HEALTH_FILTERS, period: "all", segment: "Mid-Market" },
+      window
+    )
+    expect(strategic.length).toBeGreaterThan(0)
+    expect(midMarket.length).toBeGreaterThan(0)
+    expect(strategic.every((item) => item.segment === "Strategic")).toBe(true)
+    expect(midMarket.every((item) => item.segment === "Mid-Market")).toBe(true)
+    expect(strategic.length + midMarket.length).toBeLessThan(snapshot.activities.length)
   })
 
   it("applies filters without inventing undefined compliance", () => {
