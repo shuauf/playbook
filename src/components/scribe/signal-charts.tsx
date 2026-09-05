@@ -95,8 +95,7 @@ export function PlaySignalSection({
         <div className="rounded-2xl bg-white p-3">
           <h2 className="font-heading text-xl">Success criteria</h2>
           <p className="mb-2 text-xs text-muted-foreground">
-            How {selectedName} activities in the {period} met each success criterion. First: every
-            recommended prerequisite present. Second: closed win rate after this play.
+            How {selectedName} activities in the {period} met each success criterion.
           </p>
           <FrequencyBars
             rows={signRows}

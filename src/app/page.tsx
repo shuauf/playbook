@@ -19,15 +19,6 @@ function first(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value
 }
 
-function latest(dates: Array<Date | null | undefined>) {
-  let max: Date | null = null
-  for (const date of dates) {
-    if (!date) continue
-    if (!max || date > max) max = date
-  }
-  return max
-}
-
 export default async function HomePage({
   searchParams,
 }: {
@@ -50,11 +41,8 @@ export default async function HomePage({
     "Mid-Market": analyzeHealth(snapshot, { ...filters, segment: "Mid-Market" }, asOf),
     SMB: analyzeHealth(snapshot, { ...filters, segment: "SMB" }, asOf),
   } satisfies Record<SegmentFilter, HealthAnalysis>
-  const gongAt = latest(snapshot.activities.map((item) => item.activityDate)) ?? new Date()
-  const salesforceAt =
-    latest(
-      snapshot.opportunities.flatMap((item) => [item.closeDate, item.createdAt])
-    ) ?? gongAt
+  const gongAt = new Date(asOf.getTime() - 3 * 60 * 60 * 1000)
+  const salesforceAt = asOf
 
   return (
     <ScribeHome

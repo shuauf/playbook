@@ -106,10 +106,7 @@ export function AiObservationsHero({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="max-w-3xl">
           <p className="text-[11px] tracking-[0.16em] text-[#D9893A] uppercase">AI Observations</p>
-          <h2 className="font-heading mt-1 text-2xl leading-tight md:text-[1.7rem]">
-            The system found these patterns first
-          </h2>
-          <p className="mt-1.5 text-sm leading-relaxed text-white/60">
+          <p className="mt-1.5 text-sm leading-relaxed text-[#f3f2ee]">
             Pattern-finding across logged activity in the {period}.
           </p>
         </div>
