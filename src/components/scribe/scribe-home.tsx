@@ -187,7 +187,7 @@ export function ScribeHome({
         <div className="rounded-2xl bg-white p-3">
           <h2 className="font-heading text-xl">Performance over time</h2>
           <p className="mb-2 text-xs text-muted-foreground">
-            Win rate, exception rate, and cycle time across the {cardsWindow}.
+            How these sales plays have affected success in the field over the {cardsWindow}.
           </p>
           <PerformanceTrendChart analysis={cards} />
         </div>
