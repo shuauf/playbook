@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { Geist, Geist_Mono, Source_Serif_4 } from "next/font/google"
+import { Analytics } from "@vercel/analytics/next"
 
 import { AppShell } from "@/components/app-shell"
 import { getWorkspaceStatus } from "@/lib/workspace/status"
@@ -45,6 +46,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         >
           {children}
         </AppShell>
+        <Analytics />
       </body>
     </html>
   )
