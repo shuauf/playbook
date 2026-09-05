@@ -22,7 +22,7 @@ import { portfolioWinLift } from "@/lib/analysis/compute"
 import { daysUntil, hygieneUrgencyFill } from "@/lib/dates"
 import { formatCount, formatRelativeAgo, pct, periodTitleLower, percentPoints } from "@/lib/format"
 import type { PlayDetail } from "@/lib/db/catalog"
-import type { HealthAnalysis } from "@/lib/analysis/types"
+import type { HealthAnalysis, LookCloserItem } from "@/lib/analysis/types"
 import type { ExplorerActivity, ExplorerOpportunity } from "@/lib/explorer/types"
 
 function HygieneRing({ days }: { days: number }) {
@@ -51,6 +51,42 @@ function HygieneRing({ days }: { days: number }) {
         {shown}
       </text>
     </svg>
+  )
+}
+
+function LookCloserCard({
+  items,
+  period,
+  onOpen,
+}: {
+  items: LookCloserItem[]
+  period: string
+  onOpen: (href: string) => void
+}) {
+  return (
+    <aside className="rounded-2xl bg-[#2B2A27] px-4 py-3 text-[#f3f2ee]">
+      <h2 className="font-heading text-xl leading-tight text-[#f3f2ee]">AI Observations</h2>
+      <p className="mt-0.5 text-xs text-white/55">
+        Patterns worth checking from logged activity and Gong in the {period}.
+      </p>
+      <div className="mt-3 divide-y divide-white/10">
+        {items.length === 0 ? (
+          <p className="py-2 text-sm text-white/60">Nothing stands out in this window yet.</p>
+        ) : (
+          items.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => onOpen(item.href)}
+              className="flex w-full cursor-pointer flex-col py-2.5 text-left first:pt-0 last:pb-0 hover:bg-white/5"
+            >
+              <span className="text-[11px] tracking-[0.12em] text-white/45 uppercase">{item.label}</span>
+              <span className="mt-0.5 text-sm leading-snug">{item.body}</span>
+            </button>
+          ))
+        )}
+      </div>
+    </aside>
   )
 }
 
@@ -161,38 +197,47 @@ export function ScribeHome({
 
       <div className="pl-14 lg:pl-56">
         <div className="mx-auto w-full max-w-[1320px] px-4 pb-8 pt-5 md:px-6">
-      <section>
-        <h2 className="font-heading text-xl">Management view</h2>
-        <p className="mt-0.5 max-w-xl text-xs text-muted-foreground">
-          Snapshot of defined-play activity in the {windowLower}.
-        </p>
-        <div className="mt-2 grid grid-cols-3 gap-2">
-          <div className="rounded-2xl bg-white px-3 py-3">
-            <p className="text-3xl font-medium tracking-tight">
-              {adherence === null ? "—" : pct(adherence, 0)}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              of activities had every recommended prerequisite
-            </p>
-          </div>
-          <div className="rounded-2xl bg-white px-3 py-3">
-            <p className="text-3xl font-medium tracking-tight">
-              {lift === null ? "—" : `${percentPoints(lift, 0)}%`}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {lift === null
-                ? `No supported win-rate comparison`
-                : `higher win rate when recommended prerequisites were present`}
-            </p>
-          </div>
-          <div className="rounded-2xl bg-white px-3 py-3">
-            <p className="text-3xl font-medium tracking-tight">{formatCount(analysis.totals.activities)}</p>
-            <p className="mt-1 text-xs text-muted-foreground">activities logged</p>
+      <section className="grid gap-3 lg:grid-cols-[minmax(0,38rem)_minmax(22rem,1fr)] lg:items-start">
+        <div>
+          <h2 className="font-heading text-xl leading-tight">Management view</h2>
+          <p className="mt-0.5 max-w-md text-xs text-muted-foreground">
+            Snapshot of defined-play activity in the {windowLower}.
+          </p>
+          <div className="mt-2 grid grid-cols-3 gap-2">
+            <div className="rounded-2xl bg-white px-3 py-3">
+              <p className="text-3xl font-medium tracking-tight tabular-nums">
+                {adherence === null ? "—" : pct(adherence, 0)}
+              </p>
+              <p className="mt-1 text-xs leading-snug text-muted-foreground">
+                of activities had every recommended prerequisite
+              </p>
+            </div>
+            <div className="rounded-2xl bg-white px-3 py-3">
+              <p className="text-3xl font-medium tracking-tight tabular-nums">
+                {lift === null ? "—" : `${percentPoints(lift, 0)}%`}
+              </p>
+              <p className="mt-1 text-xs leading-snug text-muted-foreground">
+                {lift === null
+                  ? `No supported win-rate comparison`
+                  : `higher win rate when recommended prerequisites were present`}
+              </p>
+            </div>
+            <div className="rounded-2xl bg-white px-3 py-3">
+              <p className="text-3xl font-medium tracking-tight tabular-nums">
+                {formatCount(analysis.totals.activities)}
+              </p>
+              <p className="mt-1 text-xs leading-snug text-muted-foreground">activities logged</p>
+            </div>
           </div>
         </div>
+        <LookCloserCard
+          items={analysis.lookCloser}
+          period={windowLower}
+          onOpen={(href) => router.push(href)}
+        />
       </section>
 
-      <section className="mt-5 grid gap-3 xl:grid-cols-2">
+      <section className="mt-6 grid gap-3 xl:grid-cols-2">
         <div className="rounded-2xl bg-white p-3">
           <h2 className="font-heading text-xl">Performance over time</h2>
           <p className="mb-2 text-xs text-muted-foreground">
@@ -210,8 +255,6 @@ export function ScribeHome({
         </div>
       </section>
 
-      <PlaySignalSection analysis={analysis} details={details} />
-
       <section className="mt-5 rounded-2xl bg-white">
         <div className="px-3 pt-3">
           <h2 className="font-heading text-xl">Sales play performance</h2>
@@ -227,6 +270,8 @@ export function ScribeHome({
           />
         </div>
       </section>
+
+      <PlaySignalSection analysis={analysis} details={details} />
 
       <section className="mt-5 rounded-2xl bg-[#2B2A27] px-3 py-3 text-[#f3f2ee]">
         <h2 className="font-heading text-xl">Play hygiene</h2>
