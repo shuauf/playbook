@@ -124,10 +124,17 @@ export type StackingBucket = {
   wonCount: number
 }
 
+export type ObservationMark = {
+  type: "text" | "play" | "person" | "metric"
+  value: string
+}
+
 export type LookCloserItem = {
   id: string
   kind: "gap" | "gong" | "define"
   label: string
+  headline: ObservationMark[]
+  detail: ObservationMark[]
   body: string
   href: string
   playId?: string

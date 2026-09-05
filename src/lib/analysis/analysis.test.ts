@@ -166,6 +166,11 @@ describe("analysis engine", () => {
       true
     )
     expect(current.lookCloser.every((item) => !/\bcalls?\b/i.test(item.body))).toBe(true)
+    const gap = current.lookCloser.find((item) => item.kind === "gap")
+    expect(gap?.headline.some((mark) => mark.type === "play" && mark.value === "Product Demo")).toBe(true)
+    expect(gap?.headline.some((mark) => mark.type === "metric")).toBe(true)
+    const define = current.lookCloser.find((item) => item.kind === "define")
+    expect(define?.detail.some((mark) => mark.type === "person")).toBe(true)
   })
 
   it("ranks deterministic actions from the planted story", () => {
