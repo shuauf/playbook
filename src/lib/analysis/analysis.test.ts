@@ -185,7 +185,7 @@ describe("analysis engine", () => {
   })
 
   it("builds a pulse from computed findings", () => {
-    expect(allTime.pulse).toMatch(/exception/i)
+    expect(allTime.pulse).toMatch(/skipped a playbook step/i)
     expect(allTime.pulse).not.toMatch(/\bAI\b|chatbot|future analysis/i)
   })
 

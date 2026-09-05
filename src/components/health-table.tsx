@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react"
 
 import { ConfidenceBadge } from "@/components/confidence-badge"
-import { formatCount, pct, pp } from "@/lib/format"
+import { formatCount, pct, winRateCompare } from "@/lib/format"
 import type { PlayFinding } from "@/lib/analysis/types"
 import {
   Table,
@@ -72,7 +72,7 @@ export function PlayPerformanceTable({
     return (
       <button
         type="button"
-        className="text-left font-medium hover:underline"
+        className="cursor-pointer text-left font-medium hover:underline"
         onClick={() =>
           setSort((current) => ({
             key,
@@ -111,7 +111,7 @@ export function PlayPerformanceTable({
               {onPlayClick ? (
                 <button
                   type="button"
-                  className="font-medium hover:underline"
+                  className="cursor-pointer font-medium hover:underline"
                   onClick={() => onPlayClick(play.playId)}
                 >
                   {play.playName}
@@ -137,11 +137,15 @@ export function PlayPerformanceTable({
                   : "—"
                 : pct(play.win.unmetRate)}
             </TableCell>
-            <TableCell>{play.win.difference === null ? "—" : pp(play.win.difference, 0)}</TableCell>
+            <TableCell>
+              {play.win.difference === null ? "—" : `${winRateCompare(play.win.difference)} when signals are present`}
+            </TableCell>
             <TableCell>
               {play.cycle.differenceDays === null
                 ? "—"
-                : `${play.cycle.differenceDays > 0 ? "+" : ""}${Math.round(play.cycle.differenceDays)}d`}
+                : play.cycle.differenceDays === 0
+                  ? "about the same"
+                  : `${Math.round(Math.abs(play.cycle.differenceDays))} days ${play.cycle.differenceDays > 0 ? "slower" : "faster"} when a signal is missing`}
             </TableCell>
             <TableCell>
               <ConfidenceBadge level={play.win.confidence} />

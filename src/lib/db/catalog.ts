@@ -25,6 +25,17 @@ export type PlayHygiene = {
   nextReview: string
 }
 
+export type PlaySign = {
+  key: string
+  text: string
+  observedRate: number
+}
+
+export type PlayDetail = PlayHygiene & {
+  recommendedRoles: string[]
+  signsOfSuccess: PlaySign[]
+}
+
 export const DEMO_PEOPLE: DemoPerson[] = [
   { id: "person-lena", name: "Lena Hart", role: "se", team: "West" },
   { id: "person-mateo", name: "Mateo Ruiz", role: "se", team: "East" },
@@ -133,13 +144,100 @@ export const DEMO_PLAYS: DemoPlay[] = [
   },
 ]
 
-export const PLAY_HYGIENE: Record<string, PlayHygiene> = {
-  "play-discovery": { owner: "Lena Hart", nextReview: "2026-10-15" },
-  "play-product-demo": { owner: "Lena Hart", nextReview: "2026-10-08" },
-  "play-architecture-review": { owner: "Mateo Ruiz", nextReview: "2026-11-03" },
-  "play-workshop": { owner: "Nora Blake", nextReview: "2026-11-20" },
-  "play-poc": { owner: "Solutions Engineering", nextReview: "2026-12-04" },
+export const PLAY_DETAIL: Record<string, PlayDetail> = {
+  "play-discovery": {
+    owner: "Lena Hart",
+    nextReview: "2026-10-15",
+    recommendedRoles: ["AE", "SC", "Process owner"],
+    signsOfSuccess: [
+      {
+        key: "disc-sign-echo",
+        text: "Customer articulated their own definition of the problem back to us",
+        observedRate: 0.48,
+      },
+      {
+        key: "disc-sign-first",
+        text: "Buyer named the workflow they want visible first",
+        observedRate: 0.61,
+      },
+    ],
+  },
+  "play-product-demo": {
+    owner: "Lena Hart",
+    nextReview: "2026-10-08",
+    recommendedRoles: ["AE", "SC", "Champion"],
+    signsOfSuccess: [
+      {
+        key: "demo-sign-outcome",
+        text: "Champion restated the measurable outcome in their own words",
+        observedRate: 0.44,
+      },
+      {
+        key: "demo-sign-next",
+        text: "A next-step owner was named before the call ended",
+        observedRate: 0.57,
+      },
+    ],
+  },
+  "play-architecture-review": {
+    owner: "Mateo Ruiz",
+    nextReview: "2026-11-03",
+    recommendedRoles: ["SC", "Solutions Engineering", "Technical stakeholder"],
+    signsOfSuccess: [
+      {
+        key: "arch-sign-path",
+        text: "Customer confirmed the system-of-record path out loud",
+        observedRate: 0.52,
+      },
+      {
+        key: "arch-sign-owner",
+        text: "A risk owner volunteered to take the integration question internally",
+        observedRate: 0.39,
+      },
+    ],
+  },
+  "play-workshop": {
+    owner: "Nora Blake",
+    nextReview: "2026-11-20",
+    recommendedRoles: ["SC", "Champion", "Process owner"],
+    signsOfSuccess: [
+      {
+        key: "ws-sign-map",
+        text: "The buying team left with a mapped current-state workflow",
+        observedRate: 0.58,
+      },
+      {
+        key: "ws-sign-owner",
+        text: "A named follow-up owner was assigned in the room",
+        observedRate: 0.41,
+      },
+    ],
+  },
+  "play-poc": {
+    owner: "Solutions Engineering",
+    nextReview: "2026-12-04",
+    recommendedRoles: ["SC", "Solutions Engineering", "Technical stakeholder", "Champion"],
+    signsOfSuccess: [
+      {
+        key: "poc-sign-met",
+        text: "Customer signed off that the agreed success criteria were met",
+        observedRate: 0.63,
+      },
+      {
+        key: "poc-sign-prod",
+        text: "Technical stakeholder agreed the path is production-ready",
+        observedRate: 0.36,
+      },
+    ],
+  },
 }
+
+export const PLAY_HYGIENE: Record<string, PlayHygiene> = Object.fromEntries(
+  Object.entries(PLAY_DETAIL).map(([id, detail]) => [
+    id,
+    { owner: detail.owner, nextReview: detail.nextReview },
+  ])
+)
 
 export const UNDEFINED_SECURITY_LABEL = "Executive workflow audit"
 export const UNDEFINED_BRIEFING_LABEL = "Process mining walkthrough"

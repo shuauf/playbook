@@ -1,4 +1,4 @@
-import { pct, pp } from "@/lib/format"
+import { percentPoints } from "@/lib/format"
 import type { ActionItem, HygieneIssue, PlayFinding, PrerequisiteFinding } from "@/lib/analysis/types"
 
 export const ACTION_RULES = {
@@ -19,6 +19,10 @@ const RANK: Record<ActionItem["classification"], number> = {
   define: 2,
   investigate: 3,
   monitor: 4,
+}
+
+function dropPercent(delta: number) {
+  return percentPoints(Math.abs(delta), 0)
 }
 
 export function rankActions(input: {
@@ -43,7 +47,7 @@ export function rankActions(input: {
         subject: play.playName,
         playId: play.playId,
         playName: play.playName,
-        evidence: `${pct(play.exceptionRate)} of ${play.playName} activities were missing a success signal, associated with a ${pp(penalty, 0)} lower closed win rate.`,
+        evidence: `Skipping a step on ${play.playName} calls has hurt win rate the most — deals win ${dropPercent(penalty)}% less often when that happens.`,
         sampleSize: play.win.metN + play.win.unmetN,
         confidence: play.win.confidence,
         href: `/?modal=play&playId=${play.playId}`,
@@ -60,7 +64,7 @@ export function rankActions(input: {
         subject: play.playName,
         playId: play.playId,
         playName: play.playName,
-        evidence: `${play.playName} shows a ${pp(penalty, 0)} win-rate gap, but there is not yet enough closed-opportunity data to act.`,
+        evidence: `${play.playName} looks like it might be changing win rate, but we have not closed enough deals to be sure yet.`,
         sampleSize: play.closedOpportunityCount,
         confidence: "insufficient",
         href: `/?modal=play&playId=${play.playId}`,
@@ -79,7 +83,7 @@ export function rankActions(input: {
         subject: play.playName,
         playId: play.playId,
         playName: play.playName,
-        evidence: `${play.playName} exceptions appear in ${pct(play.exceptionRate)} of activities. The current comparison does not yet support a change to the play.`,
+        evidence: `${play.playName} calls skip a success signal fairly often, but the win-rate difference is too small to change the play yet.`,
         sampleSize: play.closedOpportunityCount,
         confidence: play.win.confidence,
         href: `/?modal=play&playId=${play.playId}`,
@@ -102,7 +106,7 @@ export function rankActions(input: {
         subject: prereq.text,
         playId: prereq.playId,
         playName: prereq.playName,
-        evidence: `${pct(prereq.unmetRate)} of ${prereq.playName} calls did not show this signal, with no meaningful win-rate difference.`,
+        evidence: `“${prereq.text}” is often missing on ${prereq.playName} calls, but win rate looks about the same either way — worth asking if we still need this signal.`,
         sampleSize: prereq.win.metN + prereq.win.unmetN,
         confidence: prereq.win.confidence === "insufficient" ? "directional" : prereq.win.confidence,
         href: `/?modal=play&playId=${prereq.playId}`,
@@ -120,7 +124,7 @@ export function rankActions(input: {
         subject: prereq.text,
         playId: prereq.playId,
         playName: prereq.playName,
-        evidence: `Calls missing “${prereq.text}” on ${prereq.playName} are associated with a ${pp(penalty, 0)} lower win rate.`,
+        evidence: `When “${prereq.text}” is missing on ${prereq.playName} calls, deals win ${dropPercent(penalty)}% less often.`,
         sampleSize: prereq.win.metN + prereq.win.unmetN,
         confidence: prereq.win.confidence,
         href: `/?modal=play&playId=${prereq.playId}`,
@@ -136,7 +140,7 @@ export function rankActions(input: {
         subject: issue.name,
         playId: null,
         playName: null,
-        evidence: `Logged off-playbook on ${issue.opportunityCount} opportunities. Success-signal status is unknown.`,
+        evidence: `SCs logged “${issue.name}” ${issue.activityCount} times outside the playbook. We do not yet know which signals matter for that work.`,
         sampleSize: issue.activityCount,
         confidence: issue.activityCount >= 40 ? "supported" : "directional",
         href: issue.href,

@@ -46,6 +46,10 @@ export function daysBetween(from: Date, to: Date) {
   return Math.round((startOfDay(to).getTime() - startOfDay(from).getTime()) / DAY_MS)
 }
 
+export function daysUntil(isoDate: string, asOf = new Date()) {
+  return daysBetween(asOf, new Date(`${isoDate}T00:00:00`))
+}
+
 export function addDays(date: Date, days: number) {
   const next = new Date(date)
   next.setDate(next.getDate() + days)

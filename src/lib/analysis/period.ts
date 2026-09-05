@@ -33,10 +33,10 @@ export function inWindow(date: Date, window: PeriodWindow) {
 }
 
 export function windowLabel(period: HealthFilters["period"]) {
-  if (period === "90") return "last 90 days"
-  if (period === "180") return "last 180 days"
-  if (period === "365") return "last 12 months"
-  return "all time"
+  if (period === "90") return "Last 90 days"
+  if (period === "180") return "Last 180 days"
+  if (period === "365") return "Last 12 months"
+  return "All time"
 }
 
 export { DAY_MS }

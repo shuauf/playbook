@@ -3,7 +3,7 @@
 import { useState } from "react"
 
 import { confidenceFill } from "@/components/confidence-badge"
-import { formatCount, formatDays, pct, pp } from "@/lib/format"
+import { compactDelta, formatCount, formatDays, pct } from "@/lib/format"
 import type { PlayFinding } from "@/lib/analysis/types"
 import type { ConfidenceLevel } from "@/lib/domain/types"
 
@@ -32,7 +32,7 @@ function playTip(play: PlayFinding) {
     `Exception rate ${play.exceptionRate === null ? "—" : pct(play.exceptionRate)}`,
     `Win rate when signals present ${play.win.metRate === null ? "—" : pct(play.win.metRate)}`,
     `Win rate when signals missing ${play.win.unmetRate === null ? "—" : pct(play.win.unmetRate)}`,
-    `Difference ${play.win.difference === null ? "—" : pp(play.win.difference, 0)}`,
+    `Difference ${play.win.difference === null ? "—" : compactDelta(play.win.difference, 0)}`,
     play.win.confidence === "insufficient" ? "Insufficient data" : `${play.win.confidence} sample`,
   ]
 }
@@ -160,7 +160,7 @@ export function OutcomeDumbbell({
           row.difference === null
             ? "—"
             : metric === "winRate"
-              ? pp(row.difference, 0)
+              ? compactDelta(row.difference, 0)
               : `${row.difference > 0 ? "+" : ""}${Math.round(row.difference)}d`
         return (
           <div key={row.id}>

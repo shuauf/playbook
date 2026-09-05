@@ -1,7 +1,7 @@
 import { ScribeHome } from "@/components/scribe/scribe-home"
 import { analyzeHealth } from "@/lib/analysis/dashboard"
 import { loadAnalysisSnapshot } from "@/lib/analysis/load"
-import { PLAY_HYGIENE } from "@/lib/db/catalog"
+import { PLAY_DETAIL } from "@/lib/db/catalog"
 import { parseHealthFilters } from "@/lib/navigation"
 import {
   listExplorerData,
@@ -37,7 +37,7 @@ export default async function HomePage({
     <ScribeHome
       analysis={analysis}
       plays={plays}
-      hygiene={PLAY_HYGIENE}
+      details={PLAY_DETAIL}
       explorer={explorer}
       people={people}
       opportunities={opportunities}
