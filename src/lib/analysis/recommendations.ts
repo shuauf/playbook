@@ -1,13 +1,29 @@
 import { addDays } from "@/lib/dates"
 import { percentPoints } from "@/lib/format"
 import { inWindow } from "@/lib/analysis/period"
-import type { AnalysisActivity, LookCloserItem, PrerequisiteFinding } from "@/lib/analysis/types"
+import type {
+  AnalysisActivity,
+  LookCloserItem,
+  ObservationMark,
+  PrerequisiteFinding,
+} from "@/lib/analysis/types"
 
 const LOOK_CLOSER_LIMIT = 3
 const SIX_WEEKS_DAYS = 42
 const GAP_MIN_CLOSED = 15
 const GONG_MIN_WINS = 20
 const DEFINE_MIN_WEEKLY = 1
+
+function flattenMarks(marks: ObservationMark[]) {
+  return marks.map((mark) => mark.value).join("")
+}
+
+function observation(item: Omit<LookCloserItem, "body">): LookCloserItem {
+  return {
+    ...item,
+    body: `${flattenMarks(item.headline)} ${flattenMarks(item.detail)}`.trim(),
+  }
+}
 
 function presenceRate(unmetRate: number | null) {
   if (unmetRate === null) return null
@@ -46,15 +62,26 @@ function pickGap(prerequisites: PrerequisiteFinding[]): LookCloserItem | null {
   if (!item || item.win.difference === null || item.unmetRate === null) return null
   const present = percentPoints(1 - item.unmetRate, 0)
   const gap = percentPoints(item.win.difference, 0)
-  return {
+  return observation({
     id: `gap-${item.playId}-${item.key}`,
     kind: "gap",
-    label: item.playName,
-    body: `“${item.text}” is on only ${present}% of ${item.playName} activities, but win rate is ${gap} points higher when it’s there.`,
+    label: "Win-rate gap",
+    headline: [
+      { type: "text", value: `“${item.text}” is on only ` },
+      { type: "metric", value: `${present}%` },
+      { type: "text", value: " of " },
+      { type: "play", value: item.playName },
+      { type: "text", value: " activities." },
+    ],
+    detail: [
+      { type: "text", value: "Win rate is " },
+      { type: "metric", value: `${gap} points higher` },
+      { type: "text", value: " when that recommended prerequisite is present." },
+    ],
     href: `/?modal=play&playId=${item.playId}`,
     playId: item.playId,
     prerequisiteKey: item.key,
-  }
+  })
 }
 
 function wonPresence(item: PrerequisiteFinding) {
@@ -85,15 +112,24 @@ function pickGong(prerequisites: PrerequisiteFinding[], usedKey?: string): LookC
     .sort((a, b) => gongDistinctiveness(b) - gongDistinctiveness(a) || wonPresence(b) - wonPresence(a))
   const item = ranked[0]
   if (!item) return null
-  return {
+  return observation({
     id: `gong-${item.playId}-${item.key}`,
     kind: "gong",
     label: "Gong",
-    body: `From Gong, won ${item.playName} activities usually had “${item.text}.”`,
+    headline: [
+      { type: "text", value: "Won " },
+      { type: "play", value: item.playName },
+      { type: "text", value: " activities usually had “" },
+      { type: "text", value: item.text },
+      { type: "text", value: ".”" },
+    ],
+    detail: [
+      { type: "text", value: "From Gong — this showed up on most activities that closed as wins." },
+    ],
     href: `/?modal=play&playId=${item.playId}`,
     playId: item.playId,
     prerequisiteKey: item.key,
-  }
+  })
 }
 
 function pickDefine(activities: AnalysisActivity[], asOf: Date): LookCloserItem | null {
@@ -119,14 +155,30 @@ function pickDefine(activities: AnalysisActivity[], asOf: Date): LookCloserItem 
     byPerson.set(row.seName, (byPerson.get(row.seName) ?? 0) + 1)
   }
   const leader = [...byPerson.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]
-  const lead = leader ? ` ${leader[0]} has done the most — a natural owner to standardize it.` : ""
-  return {
+  const detail: ObservationMark[] = [
+    { type: "text", value: "For the past 6 weeks." },
+  ]
+  if (leader) {
+    detail.push(
+      { type: "text", value: " " },
+      { type: "person", value: leader[0] },
+      { type: "text", value: " has done the most — a natural owner to standardize it." }
+    )
+  }
+  return observation({
     id: `define-${name}`,
     kind: "define",
     label: "Not defined",
-    body: `About ${label} “${name}” ${label === "1" ? "activity" : "activities"} a week for the past 6 weeks.${lead}`,
+    headline: [
+      { type: "text", value: "About " },
+      { type: "metric", value: label },
+      { type: "text", value: " " },
+      { type: "play", value: name },
+      { type: "text", value: ` ${label === "1" ? "activity" : "activities"} a week.` },
+    ],
+    detail,
     href: "/?modal=offbook",
-  }
+  })
 }
 
 export function recommendLookCloser(input: {
