@@ -42,7 +42,7 @@ export default async function HomePage({
     SMB: analyzeHealth(snapshot, { ...filters, segment: "SMB" }, asOf),
   } satisfies Record<SegmentFilter, HealthAnalysis>
   const gongAt = new Date(asOf.getTime() - 3 * 60 * 60 * 1000)
-  const salesforceAt = asOf
+  const salesforceAt = new Date(asOf.getTime() - 5 * 60 * 1000)
 
   return (
     <ScribeHome
