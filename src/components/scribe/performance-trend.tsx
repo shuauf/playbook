@@ -112,11 +112,8 @@ export function PerformanceTrendChart({ analysis }: { analysis: HealthAnalysis }
                 : pct(raw)
             return (
               <g key={point.label}>
-                <circle cx={xs[index]} cy={y(raw)} r="3" fill="#D9893A">
-                  <title>
-                    {monthLabel(point.label)}: {tip}
-                  </title>
-                </circle>
+                <title>{`${monthLabel(point.label)}: ${tip}`}</title>
+                <circle cx={xs[index]} cy={y(raw)} r="3" fill="#D9893A" />
                 <text x={xs[index]} y={height - 6} textAnchor="middle" className="fill-muted-foreground" fontSize="9">
                   {monthLabel(point.label)}
                 </text>

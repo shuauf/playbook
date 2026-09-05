@@ -111,6 +111,18 @@ describe("analysis engine", () => {
       expect.arrayContaining(DEMO_PLAYS.map((play) => play.id))
     )
     expect(allTime.hygiene.some((item) => item.kind === "undefined")).toBe(true)
+    expect(allTime.performanceTrend.every((point) => /^\d{4}-\d{2}$/.test(point.label))).toBe(true)
+    const currentMonths = new Set(
+      snapshot.activities
+        .filter((item) => !current.window.start || item.activityDate >= current.window.start)
+        .filter((item) => item.activityDate <= current.window.end)
+        .map(
+          (item) =>
+            `${item.activityDate.getFullYear()}-${String(item.activityDate.getMonth() + 1).padStart(2, "0")}`
+        )
+    )
+    expect(current.performanceTrend.length).toBeGreaterThan(0)
+    expect(current.performanceTrend.every((point) => currentMonths.has(point.label))).toBe(true)
   })
 
   it("uses won opportunities only for cycle-time comparison", () => {

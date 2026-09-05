@@ -293,6 +293,7 @@ export function playPerformanceTrend(
     if (activityHasException(activity)) month.exceptions += 1
   }
 
+  const monthsWithActivity = new Set(buckets.keys())
   const counted = new Set<string>()
   for (const activity of scoped) {
     const opportunity = opportunities.get(activity.opportunityId)
@@ -300,6 +301,8 @@ export function playPerformanceTrend(
     if (opportunity.outcome !== "won" && opportunity.outcome !== "lost") continue
     if (counted.has(opportunity.id)) continue
     counted.add(opportunity.id)
+    const closeLabel = `${opportunity.closeDate.getFullYear()}-${String(opportunity.closeDate.getMonth() + 1).padStart(2, "0")}`
+    if (!monthsWithActivity.has(closeLabel)) continue
     const month = bucket(opportunity.closeDate)
     if (opportunity.outcome === "won") {
       month.won += 1
