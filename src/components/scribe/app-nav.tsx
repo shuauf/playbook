@@ -5,14 +5,14 @@ import { cn } from "@/lib/utils"
 const TABS = [
   { id: "home", label: "Home" },
   { id: "team", label: "Team" },
-  { id: "playbook-iteration", label: "Playbook Iteration", href: "/" },
+  { id: "playbook-execution", label: "Playbook Execution", href: "/" },
   { id: "attainment", label: "Attainment, Coverage & Capacity" },
   { id: "coaching", label: "Coaching & Performance" },
   { id: "assets", label: "Assets & Enablement" },
   { id: "hiring", label: "Hiring & Onboarding" },
 ] as const
 
-export function AppNav({ current = "playbook-iteration" }: { current?: (typeof TABS)[number]["id"] }) {
+export function AppNav({ current = "playbook-execution" }: { current?: (typeof TABS)[number]["id"] }) {
   return (
     <nav aria-label="Product areas" className="flex min-w-0 flex-1 items-stretch overflow-x-auto">
       {TABS.map((tab) => {
