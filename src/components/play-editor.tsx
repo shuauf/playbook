@@ -140,7 +140,7 @@ export function PlayEditor({
         </fieldset>
         <div className="grid gap-3">
           <div className="flex items-center justify-between">
-            <Label>Success signals</Label>
+            <Label>Recommended prerequisites</Label>
             <Button
               type="button"
               variant="outline"

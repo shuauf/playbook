@@ -297,7 +297,7 @@ export function ExplorerView({
                   <TableHead>Play</TableHead>
                   <TableHead>Stage</TableHead>
                   <TableHead>SE</TableHead>
-                  <TableHead>Success signals</TableHead>
+                  <TableHead>Recommended prerequisites</TableHead>
                   <TableHead>Unmet</TableHead>
                 </TableRow>
               </TableHeader>

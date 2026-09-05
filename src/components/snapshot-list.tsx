@@ -18,7 +18,7 @@ export function SnapshotList({
   }
 
   if (snapshots.length === 0) {
-    return <p className="text-sm text-muted-foreground">No success signals were attached to this play version.</p>
+    return <p className="text-sm text-muted-foreground">No recommended prerequisites were attached to this play version.</p>
   }
 
   return (

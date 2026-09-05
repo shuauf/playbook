@@ -79,9 +79,9 @@ function OffPlaybookPanel({
   return (
     <aside className="rounded-2xl bg-[#2B2A27] px-4 py-3 text-[#f3f2ee]">
       <p className="text-[11px] tracking-[0.16em] text-white/50 uppercase">Off-playbook activity</p>
-      <p className="font-heading mt-0.5 text-lg leading-tight">Logged outside the standard plays</p>
+      <p className="font-heading mt-0.5 text-lg leading-tight">Logged outside the defined plays</p>
       <p className="mt-1 text-[11px] text-white/50">
-        Sales plays SCs recorded that are not in the five-play playbook. {period}.
+        Work SCs recorded that does not map to a defined play. {period}.
       </p>
       <div className="mt-2 divide-y divide-white/10">
         {items.length === 0 ? (
@@ -173,11 +173,9 @@ export function ScribeHome({
   return (
     <div className="mx-auto w-full max-w-[1320px] px-4 pb-8 md:px-6">
       <header className="flex flex-wrap items-center justify-between gap-2 py-2.5">
-        <div>
-          <p className="font-heading text-xl leading-none">Playbook</p>
-          <p className="text-[11px] tracking-[0.14em] text-muted-foreground uppercase">Demo workspace</p>
-        </div>
+        <p className="font-heading text-xl leading-none">Playbook</p>
         <div className="flex flex-wrap items-center gap-2">
+          <p className="text-[11px] tracking-[0.16em] text-muted-foreground uppercase">Track & iterate</p>
           <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs ring-1 ring-[#2B2A27]/10">
             <span className="size-2 rounded-full bg-[#D9893A]" />
             Gong
@@ -207,11 +205,11 @@ export function ScribeHome({
 
       <section>
         <h1 className="font-heading text-[1.75rem] leading-tight md:text-[2rem]">
-          The <span className="text-[#D9893A]">playbook</span>
+          The <span className="text-[#D9893A]">plays</span>
         </h1>
         <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-          Five standard plays. Click a card for success signals, signs of success, and who should be in the
-          room.
+          Defined plays in this workspace. Open a card for recommended prerequisites, success criteria,
+          and who should be in the room.
         </p>
         <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
           {plays.map((play) => {
@@ -246,11 +244,9 @@ export function ScribeHome({
 
       <section className="mt-5 grid gap-3 xl:grid-cols-[minmax(0,1.2fr)_minmax(20rem,0.8fr)]">
         <div>
-          <h2 className="font-heading text-xl">
-            See <span className="text-[#D9893A]">exactly</span> what&apos;s happening
-          </h2>
+          <h2 className="font-heading text-xl">What&apos;s happening</h2>
           <p className="mt-0.5 max-w-xl text-xs text-muted-foreground">
-            Numbers below are for the {windowLower}.
+            Snapshot of defined-play activity in the {windowLower}.
           </p>
           <div className="mt-2 grid grid-cols-3 gap-2">
             <div className="rounded-2xl bg-white px-3 py-3">
@@ -258,7 +254,7 @@ export function ScribeHome({
                 {adherence === null ? "—" : pct(adherence, 0)}
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
-                of calls followed every success signal
+                of calls had every recommended prerequisite
               </p>
             </div>
             <div className="rounded-2xl bg-white px-3 py-3">
@@ -268,7 +264,7 @@ export function ScribeHome({
               <p className="mt-1 text-xs text-muted-foreground">
                 {lift === null
                   ? `No supported win-rate comparison`
-                  : `higher win rate when signals were present${liftPlay ? ` — ${liftPlay.playName}` : ""}`}
+                  : `higher win rate when recommended prerequisites were present${liftPlay ? ` — ${liftPlay.playName}` : ""}`}
               </p>
             </div>
             <div className="rounded-2xl bg-white px-3 py-3">
@@ -287,29 +283,12 @@ export function ScribeHome({
 
       <PlaySignalSection analysis={analysis} details={details} />
 
-      <section className="mt-5 grid gap-3 xl:grid-cols-2">
-        <div className="rounded-2xl bg-white p-3">
-          <h2 className="font-heading text-xl">Sales play performance over time</h2>
-          <p className="mb-2 text-xs text-muted-foreground">
-            Win rate, exception rate, and cycle time from the {windowLower} — not a static snapshot.
-          </p>
-          <PerformanceTrendChart analysis={analysis} />
-        </div>
-        <div className="rounded-2xl bg-white p-3">
-          <h2 className="font-heading text-xl">When the playbook is followed</h2>
-          <p className="mb-2 text-xs text-muted-foreground">
-            Closed deals in the {windowLower}. Teal: every success signal present. Amber: at least one
-            missing.
-          </p>
-          <OutcomeChart analysis={analysis} />
-        </div>
-      </section>
-
       <section className="mt-5 rounded-2xl bg-white">
         <div className="px-3 pt-3">
           <h2 className="font-heading text-xl">Sales play performance</h2>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            The same {windowLower} window. Click a play name to open its signals.
+            How each defined play performed in the {windowLower}. Open a play for its recommended
+            prerequisites and success criteria.
           </p>
         </div>
         <div className="mt-1 overflow-x-auto">
@@ -320,10 +299,28 @@ export function ScribeHome({
         </div>
       </section>
 
+      <section className="mt-5 grid gap-3 xl:grid-cols-2">
+        <div className="rounded-2xl bg-white p-3">
+          <h2 className="font-heading text-xl">Performance over time</h2>
+          <p className="mb-2 text-xs text-muted-foreground">
+            Win rate, exception rate, and cycle time across the {windowLower}.
+          </p>
+          <PerformanceTrendChart analysis={analysis} />
+        </div>
+        <div className="rounded-2xl bg-white p-3">
+          <h2 className="font-heading text-xl">When plays are followed</h2>
+          <p className="mb-2 text-xs text-muted-foreground">
+            Closed deals in the {windowLower}. Teal: every recommended prerequisite present. Amber: at
+            least one missing.
+          </p>
+          <OutcomeChart analysis={analysis} />
+        </div>
+      </section>
+
       <section className="mt-5 rounded-2xl bg-[#2B2A27] px-3 py-3 text-[#f3f2ee]">
-        <h2 className="font-heading text-xl">Playbook hygiene</h2>
+        <h2 className="font-heading text-xl">Play hygiene</h2>
         <p className="mt-0.5 text-xs text-white/55">
-          A fuller ring means the next review is closer. Number is days left. Soonest first.
+          A fuller ring means the next review is closer. The number is days left, soonest first.
         </p>
         <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
           {hygieneRows.map(({ play, meta, countdown }) => (

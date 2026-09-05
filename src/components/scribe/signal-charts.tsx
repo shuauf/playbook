@@ -77,32 +77,32 @@ export function PlaySignalSection({
   return (
     <section className="mt-5">
       <div className="mb-2 flex flex-wrap items-end justify-between gap-2">
-        <div>
-          <h2 className="font-heading text-xl">What Gong is seeing</h2>
-          <p className="text-xs text-muted-foreground">
-            Live rates from logged {selectedName} calls in the {period}.
-          </p>
-        </div>
+        <p className="text-xs text-muted-foreground">
+          Rates from logged {selectedName} calls in the {period}.
+        </p>
         <PlayPick plays={plays} value={playId} onChange={setPlayId} />
       </div>
       <div className="grid gap-3 lg:grid-cols-2">
         <div className="rounded-2xl bg-white p-3">
-          <h3 className="text-sm font-medium">Success signals present</h3>
-          <p className="mb-2 text-[11px] text-muted-foreground">Share of calls where each signal was tagged</p>
+          <h2 className="font-heading text-xl">Recommended prerequisites</h2>
+          <p className="mb-2 text-xs text-muted-foreground">
+            Share of calls where each recommended prerequisite was present.
+          </p>
           <FrequencyBars
             rows={signalRows}
-            empty={`No success-signal results for ${selectedName} in the ${period}.`}
+            empty={`No recommended-prerequisite results for ${selectedName} in the ${period}.`}
             barClass="bg-[#3D8B8B]"
           />
         </div>
         <div className="rounded-2xl bg-white p-3">
-          <h3 className="text-sm font-medium">Signs of success</h3>
-          <p className="mb-2 text-[11px] text-muted-foreground">
-            First sign: calls where every signal was present. Second: closed win rate after this play.
+          <h2 className="font-heading text-xl">Success criteria</h2>
+          <p className="mb-2 text-xs text-muted-foreground">
+            First criterion: calls where every recommended prerequisite was present. Second: closed win
+            rate after this play.
           </p>
           <FrequencyBars
             rows={signRows}
-            empty={`No signs of success are defined for ${selectedName} yet.`}
+            empty={`No success criteria are defined for ${selectedName} yet.`}
             barClass="bg-[#D9893A]"
           />
         </div>
@@ -115,7 +115,7 @@ export function SignalFrequencyChart({ rows }: { rows: SignalFrequency[] }) {
   return (
     <FrequencyBars
       rows={rows.map((row) => ({ key: `${row.playName}-${row.key}`, label: row.label, metRate: row.metRate }))}
-      empty="No Gong-sourced signals in this window."
+      empty="No recommended-prerequisite results in this window."
       barClass="bg-[#3D8B8B]"
     />
   )

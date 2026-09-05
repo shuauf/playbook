@@ -193,7 +193,7 @@ export function PlayModal({
       <div className="mt-5 rounded-2xl border border-border p-3">
         <div className="mb-2 flex items-center justify-between">
           <div>
-            <Label>Success signals</Label>
+            <Label>Recommended prerequisites</Label>
             <p className="text-[11px] text-muted-foreground">
               Things we believe make the play likely to succeed — not requirements to gate on.
             </p>
@@ -204,7 +204,7 @@ export function PlayModal({
             size="sm"
             onClick={() => setSignals((current) => [...current, { key: "", text: "" }])}
           >
-            Add signal
+            Add prerequisite
           </Button>
         </div>
         <ol className="space-y-2">
@@ -234,20 +234,20 @@ export function PlayModal({
         </ol>
         <p className="mt-2 inline-flex items-center gap-1.5 text-[11px] text-muted-foreground">
           <span className="rounded-full bg-[#EBEDF1] px-2 py-0.5">detected via Gong</span>
-          Shown as if Gong tagged whether each signal was present.
+          Shown as if call recordings tagged whether each recommended prerequisite was present.
         </p>
       </div>
 
       <div className="mt-4 rounded-2xl border border-border p-3">
         <div className="mb-2 flex items-center justify-between">
           <div>
-            <Label>Signs of success</Label>
+            <Label>Success criteria</Label>
             <p className="text-[11px] text-muted-foreground">
-              Outcome indicators — signs the play actually went well, not preconditions to start it.
+              Outcome indicators — evidence the play actually went well, not preconditions to start it.
             </p>
           </div>
           <Button type="button" variant="outline" size="sm" onClick={() => setSigns((current) => [...current, ""])}>
-            Add sign
+            Add criterion
           </Button>
         </div>
         <ol className="space-y-2">
@@ -376,7 +376,7 @@ export function ExplorerModal({
                 <th className="pb-2 font-medium">Opportunity</th>
                 <th className="pb-2 font-medium">Play</th>
                 <th className="pb-2 font-medium">SC</th>
-                <th className="pb-2 font-medium">Signals</th>
+                <th className="pb-2 font-medium">Prerequisites</th>
               </tr>
             </thead>
             <tbody className="divide-y">
@@ -492,7 +492,7 @@ export function LogActivityModal({
     if (!isOther && selectedPlay) {
       const missing = selectedPlay.prerequisites.some((item) => !checks[item.key])
       if (missing) {
-        setError("Mark every success signal as Met or Not Met.")
+        setError("Mark every recommended prerequisite as Met or Not Met.")
         return
       }
     }
@@ -628,9 +628,9 @@ export function LogActivityModal({
         </div>
       ) : (
         <fieldset className="mt-4 space-y-2">
-          <legend className="text-sm font-medium">Success signals</legend>
+          <legend className="text-sm font-medium">Recommended prerequisites</legend>
           <p className="text-xs text-muted-foreground">
-            Mark whether each observed pattern was present. These are not requirements to gate on.
+            Mark whether each recommended prerequisite was present. These are not requirements to gate on.
           </p>
           {(selectedPlay?.prerequisites ?? []).map((item) => {
             const value = checks[item.key] ?? ""

@@ -115,7 +115,7 @@ export function HealthView({
 
       <section className="grid gap-4 lg:grid-cols-2">
         <div className="rounded-xl bg-card p-4 ring-1 ring-foreground/10">
-          <h2 className="font-heading text-xl">Win rate when the playbook is followed</h2>
+          <h2 className="font-heading text-xl">Win rate when plays are followed</h2>
           <p className="mb-3 text-xs text-muted-foreground">
             Closed opportunities only. Hollow marks mean the sample is insufficient.
           </p>

@@ -114,7 +114,7 @@ export function AddActivityForm({
     if (!isUndefined && selectedPlay) {
       const missing = selectedPlay.prerequisites.some((item) => !checks[item.key])
       if (missing) {
-        setError("Mark every success signal as Met or Not Met.")
+        setError("Mark every recommended prerequisite as Met or Not Met.")
         return
       }
     }
@@ -208,7 +208,7 @@ export function AddActivityForm({
           <CardTitle>2. What happened</CardTitle>
           <CardDescription>
             Use a defined sales play, or log an undefined type. Undefined work is not evaluated
-            against success signals.
+            against recommended prerequisites.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -240,8 +240,8 @@ export function AddActivityForm({
           {isUndefined ? (
             <div className="space-y-3 rounded-lg border border-border bg-card/60 p-3">
               <p className="text-sm text-muted-foreground">
-                There are no success signals to evaluate. This non-standard play will surface
-                under Off-playbook activity. Mapping it later will not invent historical
+                There are no recommended prerequisites to evaluate. This non-standard play will
+                surface under Off-playbook activity. Mapping it later will not invent historical
                 snapshots.
               </p>
               <div className="grid gap-2">
@@ -265,9 +265,10 @@ export function AddActivityForm({
             </div>
           ) : (
             <fieldset className="space-y-3">
-              <legend className="text-sm font-medium">Success signals</legend>
+              <legend className="text-sm font-medium">Recommended prerequisites</legend>
               <p className="text-sm text-muted-foreground">
-                Every success signal needs an explicit answer. An unchecked box is not a Not Met.
+                Every recommended prerequisite needs an explicit answer. An unchecked box is not a Not
+                Met.
               </p>
               {(selectedPlay?.prerequisites ?? []).map((item) => {
                 const value = checks[item.key] ?? ""
