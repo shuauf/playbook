@@ -23,7 +23,7 @@ function ObservationCopy({
           return (
             <span
               key={`${mark.type}-${index}`}
-              className="mx-0.5 inline-flex translate-y-[-1px] items-center rounded-full bg-[#EBEDF1] px-2 py-0.5 text-[0.72em] font-medium tracking-normal text-[#2B2A27] align-baseline"
+              className="mx-0.5 inline-flex translate-y-[-1px] items-center rounded-full bg-[#2B2A27] px-2 py-0.5 text-[0.78em] font-semibold tracking-normal text-[#f3f2ee] align-baseline"
             >
               {mark.value}
             </span>
@@ -31,7 +31,7 @@ function ObservationCopy({
         }
         if (mark.type === "person") {
           return (
-            <strong key={`${mark.type}-${index}`} className="font-semibold text-[#2B2A27]">
+            <strong key={`${mark.type}-${index}`} className="font-bold text-[#2B2A27]">
               {mark.value}
             </strong>
           )
@@ -40,7 +40,7 @@ function ObservationCopy({
           return (
             <span
               key={`${mark.type}-${index}`}
-              className="font-semibold tabular-nums text-[#D9893A]"
+              className="font-bold tabular-nums text-[#D9893A]"
             >
               {mark.value}
             </span>
@@ -57,23 +57,45 @@ export function AiObservationsHero({
   period,
   stats,
   onOpen,
+  onExplorer,
+  onLog,
 }: {
   items: LookCloserItem[]
   period: string
   stats: Array<{ value: string; label: string }>
   onOpen: (href: string) => void
+  onExplorer: () => void
+  onLog: () => void
 }) {
   return (
     <section className="rounded-2xl bg-[#2B2A27] px-4 py-4 text-[#f3f2ee] md:px-5 md:py-5">
-      <div className="max-w-3xl">
-        <p className="text-[11px] tracking-[0.16em] text-[#D9893A] uppercase">AI Observations</p>
-        <h2 className="font-heading mt-1 text-2xl leading-tight md:text-[1.7rem]">
-          The system found these patterns first
-        </h2>
-        <p className="mt-1.5 text-sm leading-relaxed text-white/60">
-          Pattern-finding across logged activity and Gong in the {period}. Three findings worth a
-          closer look before the rest of the page.
-        </p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="max-w-3xl">
+          <p className="text-[11px] tracking-[0.16em] text-[#D9893A] uppercase">AI Observations</p>
+          <h2 className="font-heading mt-1 text-2xl leading-tight md:text-[1.7rem]">
+            The system found these patterns first
+          </h2>
+          <p className="mt-1.5 text-sm leading-relaxed text-white/60">
+            Pattern-finding across logged activity and Gong in the {period}. Three findings worth a
+            closer look before the rest of the page.
+          </p>
+        </div>
+        <div className="flex shrink-0 items-center gap-2 sm:pt-1">
+          <button
+            type="button"
+            onClick={onExplorer}
+            className="cursor-pointer rounded-full border border-white/25 px-4 py-1.5 text-sm text-[#f3f2ee] hover:bg-white/10"
+          >
+            Activity explorer
+          </button>
+          <button
+            type="button"
+            onClick={onLog}
+            className="cursor-pointer rounded-full bg-[#f7f7f5] px-4 py-1.5 text-sm text-[#2B2A27] hover:bg-white"
+          >
+            Log activity
+          </button>
+        </div>
       </div>
 
       <div className="mt-3 flex flex-wrap gap-x-6 gap-y-2">
@@ -99,7 +121,7 @@ export function AiObservationsHero({
                 "shadow-sm transition-colors hover:bg-white"
               )}
             >
-              <span className={cn("text-[11px] tracking-[0.14em] uppercase", CATEGORY_TONE[item.kind])}>
+              <span className={cn("text-[11px] font-semibold tracking-[0.14em] uppercase", CATEGORY_TONE[item.kind])}>
                 {item.label}
               </span>
               <p className="font-heading mt-2 text-lg leading-snug text-[#2B2A27]">
