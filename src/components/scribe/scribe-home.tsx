@@ -17,6 +17,7 @@ import {
   type PlayDefinition,
 } from "@/components/scribe/modals"
 import { AiObservationsHero } from "@/components/scribe/ai-observations-hero"
+import { AppNav } from "@/components/scribe/app-nav"
 import { PlaySidebar } from "@/components/scribe/play-sidebar"
 import { PlaySignalSection } from "@/components/scribe/signal-charts"
 import { portfolioWinLift } from "@/lib/analysis/compute"
@@ -116,16 +117,15 @@ export function ScribeHome({
 
   return (
     <div>
-      <header className="sticky top-0 z-40 flex h-14 items-center justify-between gap-2 border-b border-border/80 bg-[#f7f7f5] px-4 md:px-6">
-        <p className="font-heading text-xl leading-none">Playbook</p>
-        <div className="flex flex-wrap items-center justify-end gap-2">
-          <p className="text-[11px] tracking-[0.16em] text-muted-foreground uppercase">Track & iterate</p>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs ring-1 ring-[#2B2A27]/10">
+      <header className="sticky top-0 z-40 flex h-14 items-stretch gap-3 border-b border-border/80 bg-[#f7f7f5] px-3 md:px-5">
+        <AppNav current="playbook-iteration" />
+        <div className="flex shrink-0 items-center justify-end gap-2">
+          <span className="hidden items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs ring-1 ring-[#2B2A27]/10 xl:inline-flex">
             <span className="size-2 rounded-full bg-[#D9893A]" />
             Gong
             <span className="text-muted-foreground">synced {formatRelativeAgo(new Date(sync.gongAt))}</span>
           </span>
-          <span className="hidden items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs ring-1 ring-[#2B2A27]/10 sm:inline-flex">
+          <span className="hidden items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs ring-1 ring-[#2B2A27]/10 xl:inline-flex">
             <span className="size-2 rounded-full bg-[#3D8B8B]" />
             Salesforce
             <span className="text-muted-foreground">synced {formatRelativeAgo(new Date(sync.salesforceAt))}</span>

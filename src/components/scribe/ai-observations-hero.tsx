@@ -3,6 +3,12 @@
 import type { LookCloserItem, ObservationMark } from "@/lib/analysis/types"
 import { cn } from "@/lib/utils"
 
+const CATEGORY_TONE: Record<LookCloserItem["kind"], string> = {
+  gap: "text-[#D9893A]",
+  gong: "text-[#3D8B8B]",
+  define: "text-[#6F6E6A]",
+}
+
 function ObservationCopy({
   marks,
   className,
@@ -17,7 +23,7 @@ function ObservationCopy({
           return (
             <span
               key={`${mark.type}-${index}`}
-              className="mx-0.5 inline-flex translate-y-[-1px] items-center rounded-full bg-white/12 px-2 py-0.5 text-[0.72em] font-medium tracking-normal text-[#f3f2ee] align-baseline"
+              className="mx-0.5 inline-flex translate-y-[-1px] items-center rounded-full bg-[#EBEDF1] px-2 py-0.5 text-[0.72em] font-medium tracking-normal text-[#2B2A27] align-baseline"
             >
               {mark.value}
             </span>
@@ -25,7 +31,7 @@ function ObservationCopy({
         }
         if (mark.type === "person") {
           return (
-            <strong key={`${mark.type}-${index}`} className="font-semibold text-[#f3f2ee]">
+            <strong key={`${mark.type}-${index}`} className="font-semibold text-[#2B2A27]">
               {mark.value}
             </strong>
           )
@@ -70,40 +76,42 @@ export function AiObservationsHero({
         </p>
       </div>
 
+      <div className="mt-3 flex flex-wrap gap-x-6 gap-y-2">
+        {stats.map((stat) => (
+          <div key={stat.label} className="min-w-0">
+            <p className="text-sm font-medium tracking-tight tabular-nums text-white/75">{stat.value}</p>
+            <p className="text-[11px] leading-snug text-white/40">{stat.label}</p>
+          </div>
+        ))}
+      </div>
+
       {items.length === 0 ? (
-        <p className="mt-5 text-sm text-white/60">Nothing stands out in this window yet.</p>
+        <p className="mt-4 text-sm text-white/60">Nothing stands out in this window yet.</p>
       ) : (
-        <div className="mt-5 grid gap-3 md:grid-cols-3">
+        <div className="mt-4 grid gap-3 md:grid-cols-3">
           {items.map((item) => (
             <button
               key={item.id}
               type="button"
               onClick={() => onOpen(item.href)}
               className={cn(
-                "flex h-full cursor-pointer flex-col rounded-xl bg-white/[0.07] px-4 py-4 text-left",
-                "transition-colors hover:bg-white/[0.11]"
+                "flex h-full cursor-pointer flex-col rounded-xl bg-[#f7f7f5] px-4 py-4 text-left text-[#2B2A27]",
+                "shadow-sm transition-colors hover:bg-white"
               )}
             >
-              <span className="text-[11px] tracking-[0.14em] text-white/40 uppercase">{item.label}</span>
-              <p className="font-heading mt-2 text-lg leading-snug">
+              <span className={cn("text-[11px] tracking-[0.14em] uppercase", CATEGORY_TONE[item.kind])}>
+                {item.label}
+              </span>
+              <p className="font-heading mt-2 text-lg leading-snug text-[#2B2A27]">
                 <ObservationCopy marks={item.headline} />
               </p>
-              <p className="mt-2 text-xs leading-relaxed text-white/55">
+              <p className="mt-2 text-xs leading-relaxed text-[#2B2A27]/55">
                 <ObservationCopy marks={item.detail} />
               </p>
             </button>
           ))}
         </div>
       )}
-
-      <div className="mt-5 grid grid-cols-3 gap-3 border-t border-white/10 pt-3">
-        {stats.map((stat) => (
-          <div key={stat.label}>
-            <p className="text-xl font-medium tracking-tight tabular-nums text-white/90">{stat.value}</p>
-            <p className="mt-0.5 text-[11px] leading-snug text-white/40">{stat.label}</p>
-          </div>
-        ))}
-      </div>
     </section>
   )
 }

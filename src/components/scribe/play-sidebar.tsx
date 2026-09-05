@@ -71,15 +71,15 @@ function SidebarList({
             title={offbookLabel}
             onClick={onOffbook}
             className={cn(
-              "mt-1 flex w-full cursor-pointer items-center gap-2.5 rounded-xl bg-[#2B2A27] px-2 py-2 text-left text-[#f3f2ee] hover:bg-[#3a3936]",
+              "mt-1 flex w-full cursor-pointer items-center gap-2.5 rounded-xl border border-dashed border-[#2B2A27]/20 bg-white/70 px-2 py-2 text-left text-[#2B2A27] hover:bg-white",
               showNames ? "" : "justify-center px-0",
-              offbookActive ? "ring-2 ring-[#D9893A]" : ""
+              offbookActive ? "bg-white shadow-sm ring-1 ring-[#2B2A27]/10" : ""
             )}
           >
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-sm font-medium">
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#EBEDF1] text-sm font-medium text-[#2B2A27]/70">
               {offbookCount}
             </span>
-            {showNames ? <span className="text-xs font-medium leading-snug">{offbookLabel}</span> : null}
+            {showNames ? <span className="text-xs font-medium leading-snug text-[#2B2A27]/75">{offbookLabel}</span> : null}
           </button>
         ) : null}
       </nav>
