@@ -240,8 +240,9 @@ export function AddActivityForm({
           {isUndefined ? (
             <div className="space-y-3 rounded-lg border border-border bg-card/60 p-3">
               <p className="text-sm text-muted-foreground">
-                There are no success signals to evaluate. This non-standard play will surface in
-                Needs a look. Mapping it later will not invent historical snapshots.
+                There are no success signals to evaluate. This non-standard play will surface
+                under Off-playbook activity. Mapping it later will not invent historical
+                snapshots.
               </p>
               <div className="grid gap-2">
                 <Label htmlFor="undefined-name">Activity type</Label>

@@ -23,7 +23,7 @@ import type { PlaybookDb } from "@/lib/db/types"
 import { undefinedLabelKey } from "@/lib/domain/labels"
 import type { OpportunityOutcome, PipelineStage, PrerequisiteStatus } from "@/lib/domain/types"
 
-export const SEED_VERSION = "scribe-optimize-v1"
+export const SEED_VERSION = "playbook-v1"
 export const SEED_AS_OF = new Date(2026, 8, 3)
 const DEMO_SOURCE = "demo"
 
@@ -618,7 +618,7 @@ export async function seedPlantedWorkspace(db: PlaybookDb, now = new Date()) {
 
   await db.insert(appMeta).values([
     { key: "demo_seed", value: SEED_VERSION },
-    { key: "workspace_name", value: "Scribe Optimize" },
+    { key: "workspace_name", value: "Demo workspace" },
     { key: "data_source", value: "demo" },
   ])
 }

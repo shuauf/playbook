@@ -28,7 +28,6 @@ export type PlayHygiene = {
 export type PlaySign = {
   key: string
   text: string
-  observedRate: number
 }
 
 export type PlayDetail = PlayHygiene & {
@@ -49,7 +48,7 @@ export const DEMO_PLAYS: DemoPlay[] = [
     id: "play-discovery",
     name: "Discovery",
     description:
-      "Map the current-state workflow and confirm the business problem before anyone sees the product. Used when Optimize is still a hypothesis, not a demo.",
+      "Map the current-state workflow and confirm the business problem before anyone sees the product. Used when the product is still a hypothesis, not a demo.",
     typicalStages: ["Qualify"],
     prerequisites: [
       {
@@ -112,7 +111,7 @@ export const DEMO_PLAYS: DemoPlay[] = [
     id: "play-workshop",
     name: "Workshop",
     description:
-      "A structured working session to map a live workflow onto Optimize with the buying team in the room.",
+      "A structured working session to map a live workflow with the buying team in the room.",
     typicalStages: ["Evaluate", "Propose"],
     prerequisites: [
       {
@@ -153,12 +152,10 @@ export const PLAY_DETAIL: Record<string, PlayDetail> = {
       {
         key: "disc-sign-echo",
         text: "Customer articulated their own definition of the problem back to us",
-        observedRate: 0.48,
       },
       {
         key: "disc-sign-first",
         text: "Buyer named the workflow they want visible first",
-        observedRate: 0.61,
       },
     ],
   },
@@ -170,12 +167,10 @@ export const PLAY_DETAIL: Record<string, PlayDetail> = {
       {
         key: "demo-sign-outcome",
         text: "Champion restated the measurable outcome in their own words",
-        observedRate: 0.44,
       },
       {
         key: "demo-sign-next",
         text: "A next-step owner was named before the call ended",
-        observedRate: 0.57,
       },
     ],
   },
@@ -187,12 +182,10 @@ export const PLAY_DETAIL: Record<string, PlayDetail> = {
       {
         key: "arch-sign-path",
         text: "Customer confirmed the system-of-record path out loud",
-        observedRate: 0.52,
       },
       {
         key: "arch-sign-owner",
         text: "A risk owner volunteered to take the integration question internally",
-        observedRate: 0.39,
       },
     ],
   },
@@ -204,12 +197,10 @@ export const PLAY_DETAIL: Record<string, PlayDetail> = {
       {
         key: "ws-sign-map",
         text: "The buying team left with a mapped current-state workflow",
-        observedRate: 0.58,
       },
       {
         key: "ws-sign-owner",
         text: "A named follow-up owner was assigned in the room",
-        observedRate: 0.41,
       },
     ],
   },
@@ -221,12 +212,10 @@ export const PLAY_DETAIL: Record<string, PlayDetail> = {
       {
         key: "poc-sign-met",
         text: "Customer signed off that the agreed success criteria were met",
-        observedRate: 0.63,
       },
       {
         key: "poc-sign-prod",
         text: "Technical stakeholder agreed the path is production-ready",
-        observedRate: 0.36,
       },
     ],
   },
@@ -271,10 +260,10 @@ export const DEMO_ACCOUNTS = [
 ]
 
 export const DEMO_DEAL_SHAPES = [
-  "Optimize rollout · $240K ACV",
+  "product rollout · $240K ACV",
   "workflow visibility program · $180K ACV",
   "process intelligence expansion · $95K ACV",
-  "capture-to-Optimize expansion · $320K ACV",
+  "capture-to-production expansion · $320K ACV",
   "automation opportunity assessment · $150K ACV",
   "enterprise playbook redesign · $275K ACV",
   "shared-services workflow map · $125K ACV",

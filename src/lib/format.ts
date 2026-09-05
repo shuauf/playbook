@@ -39,3 +39,19 @@ export function formatDays(days: number | null) {
   const rounded = Math.round(days)
   return `${rounded} day${rounded === 1 ? "" : "s"}`
 }
+
+export function formatRelativeAgo(date: Date, asOf = new Date()) {
+  const deltaMs = asOf.getTime() - date.getTime()
+  if (Number.isNaN(deltaMs) || deltaMs < 0) return "just now"
+  const minutes = Math.round(deltaMs / 60_000)
+  if (minutes < 1) return "just now"
+  if (minutes === 1) return "1 min ago"
+  if (minutes < 60) return `${minutes} min ago`
+  const hours = Math.round(minutes / 60)
+  if (hours === 1) return "1 hour ago"
+  if (hours < 24) return `${hours} hours ago`
+  const days = Math.round(minutes / (60 * 24))
+  if (days === 1) return "1 day ago"
+  if (days < 14) return `${days} days ago`
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+}

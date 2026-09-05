@@ -290,15 +290,17 @@ export function ExplorerModal({
   activities,
   opportunities,
   initialOpportunityId,
+  initialQuery,
   onClose,
 }: {
   activities: ExplorerActivity[]
   opportunities: ExplorerOpportunity[]
   initialOpportunityId?: string
+  initialQuery?: string
   onClose: () => void
 }) {
   const [view, setView] = useState<"all" | "opportunity">("all")
-  const [query, setQuery] = useState("")
+  const [query, setQuery] = useState(initialQuery ?? "")
   const [expanded, setExpanded] = useState<string | null>(initialOpportunityId ?? null)
 
   const filteredActivities = useMemo(
@@ -529,7 +531,7 @@ export function LogActivityModal({
   return (
     <ModalShell
       title="Log activity"
-      subtitle="Record a play against an opportunity. Non-standard plays surface in Needs a look."
+      subtitle="Record a play against an opportunity. Non-standard plays surface under Off-playbook activity."
       onClose={onClose}
     >
       {selectedOpportunity ? (
