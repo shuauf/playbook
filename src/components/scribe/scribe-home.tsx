@@ -64,12 +64,12 @@ function LookCloserCard({
   onOpen: (href: string) => void
 }) {
   return (
-    <aside className="rounded-2xl bg-[#2B2A27] px-4 py-3 text-[#f3f2ee]">
-      <h2 className="font-heading text-xl text-[#f3f2ee]">Look closer</h2>
+    <aside className="flex h-full flex-col rounded-2xl bg-[#2B2A27] px-4 py-3 text-[#f3f2ee]">
+      <h2 className="font-heading text-xl leading-tight text-[#f3f2ee]">AI Observations</h2>
       <p className="mt-0.5 text-xs text-white/55">
         Patterns worth checking from logged activity and Gong in the {period}.
       </p>
-      <div className="mt-2 divide-y divide-white/10">
+      <div className="mt-3 divide-y divide-white/10">
         {items.length === 0 ? (
           <p className="py-2 text-sm text-white/60">Nothing stands out in this window yet.</p>
         ) : (
@@ -78,10 +78,10 @@ function LookCloserCard({
               key={item.id}
               type="button"
               onClick={() => onOpen(item.href)}
-              className="flex w-full cursor-pointer flex-col py-2.5 text-left hover:bg-white/5"
+              className="flex w-full cursor-pointer flex-col py-2.5 text-left first:pt-0 last:pb-0 hover:bg-white/5"
             >
               <span className="text-[11px] tracking-[0.12em] text-white/45 uppercase">{item.label}</span>
-              <span className="mt-1 text-sm leading-snug">{item.body}</span>
+              <span className="mt-0.5 text-sm leading-snug">{item.body}</span>
             </button>
           ))
         )}
@@ -197,34 +197,36 @@ export function ScribeHome({
 
       <div className="pl-14 lg:pl-56">
         <div className="mx-auto w-full max-w-[1320px] px-4 pb-8 pt-5 md:px-6">
-      <section className="grid gap-3 xl:grid-cols-[minmax(17rem,20rem)_minmax(0,1fr)] xl:items-start">
-        <div>
-          <h2 className="font-heading text-xl">Management view</h2>
+      <section className="grid items-stretch gap-3 lg:grid-cols-2">
+        <div className="rounded-2xl bg-white px-4 py-3">
+          <h2 className="font-heading text-xl leading-tight">Management view</h2>
           <p className="mt-0.5 text-xs text-muted-foreground">
             Snapshot of defined-play activity in the {windowLower}.
           </p>
-          <div className="mt-2 space-y-2">
-            <div className="rounded-2xl bg-white px-3 py-3">
-              <p className="text-3xl font-medium tracking-tight">
+          <div className="mt-3 divide-y divide-border">
+            <div className="flex items-baseline gap-4 py-2.5 first:pt-0">
+              <p className="w-[4.75rem] shrink-0 text-3xl font-medium tracking-tight tabular-nums">
                 {adherence === null ? "—" : pct(adherence, 0)}
               </p>
-              <p className="mt-1 text-xs text-muted-foreground">
+              <p className="text-xs leading-snug text-muted-foreground">
                 of activities had every recommended prerequisite
               </p>
             </div>
-            <div className="rounded-2xl bg-white px-3 py-3">
-              <p className="text-3xl font-medium tracking-tight">
+            <div className="flex items-baseline gap-4 py-2.5">
+              <p className="w-[4.75rem] shrink-0 text-3xl font-medium tracking-tight tabular-nums">
                 {lift === null ? "—" : `${percentPoints(lift, 0)}%`}
               </p>
-              <p className="mt-1 text-xs text-muted-foreground">
+              <p className="text-xs leading-snug text-muted-foreground">
                 {lift === null
                   ? `No supported win-rate comparison`
                   : `higher win rate when recommended prerequisites were present`}
               </p>
             </div>
-            <div className="rounded-2xl bg-white px-3 py-3">
-              <p className="text-3xl font-medium tracking-tight">{formatCount(analysis.totals.activities)}</p>
-              <p className="mt-1 text-xs text-muted-foreground">activities logged</p>
+            <div className="flex items-baseline gap-4 py-2.5 last:pb-0">
+              <p className="w-[4.75rem] shrink-0 text-3xl font-medium tracking-tight tabular-nums">
+                {formatCount(analysis.totals.activities)}
+              </p>
+              <p className="text-xs leading-snug text-muted-foreground">activities logged</p>
             </div>
           </div>
         </div>
