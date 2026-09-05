@@ -42,7 +42,7 @@ function normalizePrerequisites(input: PlayDefinitionInput["prerequisites"]) {
     .filter((item) => item.text.length > 0)
 
   if (items.length === 0) {
-    throw new Error("Add at least one success signal.")
+    throw new Error("Add at least one recommended prerequisite.")
   }
 
   return items.map((item, index) => {

@@ -24,7 +24,7 @@ const sourceSerif = Source_Serif_4({
 
 export const metadata: Metadata = {
   title: "Playbook",
-  description: "See exactly what's happening in the playbook. Know exactly what to fix.",
+  description: "See exactly what's happening in the plays. Know exactly what to fix.",
 }
 
 export const dynamic = "force-dynamic"

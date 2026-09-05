@@ -102,7 +102,7 @@ export function analyzeHealth(
           : formatSignedPct(metricDelta(current.exceptionRate, prior.exceptionRate)),
       delta: metricDelta(current.exceptionRate, prior?.exceptionRate ?? null),
       definition:
-        "Share of defined activities with at least one missing success signal. Off-playbook activities are excluded.",
+        "Share of defined activities with at least one missing recommended prerequisite. Off-playbook activities are excluded.",
       href: "/?modal=explorer",
     },
     {

@@ -392,9 +392,9 @@ export function stackingBuckets(pairs: OpportunityPlayPair[]): StackingBucket[] 
     }
   }
   return [
-    toBucket("none", "No missing signals", groups.none),
-    toBucket("one", "One missing signal", groups.one),
-    toBucket("twoPlus", "Two or more missing signals", groups.twoPlus),
+    toBucket("none", "No missing prerequisites", groups.none),
+    toBucket("one", "One missing prerequisite", groups.one),
+    toBucket("twoPlus", "Two or more missing prerequisites", groups.twoPlus),
   ]
 }
 

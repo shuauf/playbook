@@ -83,7 +83,7 @@ export function hygieneIssues(
     issues.push({
       id: "missing-snapshots",
       kind: "missing_snapshots",
-      name: "Defined activities missing success-signal information",
+      name: "Defined activities missing recommended-prerequisite information",
       activityCount: missing.length,
       opportunityCount: new Set(missing.map((item) => item.opportunityId)).size,
       firstAt: formatDisplayDate(

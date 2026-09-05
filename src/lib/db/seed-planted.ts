@@ -438,7 +438,7 @@ export function buildPlantedWorkspace() {
       activityDate: addDays(opp.createdAt, 16),
       stageAtActivity: "Validate",
       seName: opp.seName,
-      note: "Logged off-playbook. No success-signal snapshot exists.",
+      note: "Logged off-playbook. No recommended-prerequisite snapshot exists.",
       captureKind: "undefined",
       checks: {},
     })

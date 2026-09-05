@@ -97,8 +97,8 @@ export function PlayPerformanceTable({
           <TableHead>{header("activityCount", "Activities")}</TableHead>
           <TableHead>{header("opportunityCount", "Opportunities")}</TableHead>
           <TableHead>{header("exceptionRate", "Exception rate")}</TableHead>
-          <TableHead>{header("metRate", "Win rate when signals present")}</TableHead>
-          <TableHead>{header("unmetRate", "Win rate when signals missing")}</TableHead>
+          <TableHead>{header("metRate", "Win rate when prerequisites present")}</TableHead>
+          <TableHead>{header("unmetRate", "Win rate when prerequisites missing")}</TableHead>
           <TableHead>{header("difference", "Difference")}</TableHead>
           <TableHead>{header("cycle", "Cycle difference")}</TableHead>
           <TableHead>{header("confidence", "Confidence")}</TableHead>
@@ -138,14 +138,14 @@ export function PlayPerformanceTable({
                 : pct(play.win.unmetRate)}
             </TableCell>
             <TableCell>
-              {play.win.difference === null ? "—" : `${winRateCompare(play.win.difference)} when signals are present`}
+              {play.win.difference === null ? "—" : `${winRateCompare(play.win.difference)} when prerequisites are present`}
             </TableCell>
             <TableCell>
               {play.cycle.differenceDays === null
                 ? "—"
                 : play.cycle.differenceDays === 0
                   ? "about the same"
-                  : `${Math.round(Math.abs(play.cycle.differenceDays))} days ${play.cycle.differenceDays > 0 ? "slower" : "faster"} when a signal is missing`}
+                  : `${Math.round(Math.abs(play.cycle.differenceDays))} days ${play.cycle.differenceDays > 0 ? "slower" : "faster"} when a prerequisite is missing`}
             </TableCell>
             <TableCell>
               <ConfidenceBadge level={play.win.confidence} />

@@ -56,7 +56,7 @@ export function WorkspaceStatusView({ status }: { status: WorkspaceStatus }) {
                   <p className="font-medium">{play.name}</p>
                   <p className="text-xs text-muted-foreground">
                     Typical stages: {play.typicalStages.join(", ") || "—"} ·{" "}
-                    {play.prerequisiteCount} success signals
+                    {play.prerequisiteCount} recommended prerequisites
                   </p>
                 </div>
                 <Badge variant="outline">{play.status}</Badge>
@@ -75,8 +75,8 @@ export function WorkspaceStatusView({ status }: { status: WorkspaceStatus }) {
           </CardHeader>
           <CardContent className="space-y-3 text-sm leading-relaxed text-muted-foreground">
             <p>
-              Product Demo includes a frequently skipped success signal associated with a large
-              closed-won gap, and another frequently skipped signal with little outcome
+              Product Demo includes a frequently skipped recommended prerequisite associated with a large
+              closed-won gap, and another frequently skipped prerequisite with little outcome
               difference.
             </p>
             <p>
@@ -92,7 +92,7 @@ export function WorkspaceStatusView({ status }: { status: WorkspaceStatus }) {
             <p>
               Undefined play in the queue:{" "}
               <span className="text-foreground">{status.planted.undefinedLabel}</span> (
-              {status.counts.undefinedActivities} activities, no invented success-signal snapshots).
+              {status.counts.undefinedActivities} activities, no invented prerequisite snapshots).
             </p>
           </CardContent>
         </Card>

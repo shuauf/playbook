@@ -117,7 +117,7 @@ export function OutcomeChart({ analysis }: { analysis: HealthAnalysis }) {
           onChange={setSlice}
           options={[
             { id: "play", label: "By sales play" },
-            { id: "signal", label: "By missing signal" },
+            { id: "signal", label: "By missing prerequisite" },
           ]}
         />
         <Toggle

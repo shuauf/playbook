@@ -30,8 +30,8 @@ function playTip(play: PlayFinding) {
     play.playName,
     `${formatCount(play.activityCount)} activities · ${formatCount(play.opportunityCount)} opportunities`,
     `Exception rate ${play.exceptionRate === null ? "—" : pct(play.exceptionRate)}`,
-    `Win rate when signals present ${play.win.metRate === null ? "—" : pct(play.win.metRate)}`,
-    `Win rate when signals missing ${play.win.unmetRate === null ? "—" : pct(play.win.unmetRate)}`,
+    `Win rate when prerequisites present ${play.win.metRate === null ? "—" : pct(play.win.metRate)}`,
+    `Win rate when prerequisites missing ${play.win.unmetRate === null ? "—" : pct(play.win.unmetRate)}`,
     `Difference ${play.win.difference === null ? "—" : compactDelta(play.win.difference, 0)}`,
     play.win.confidence === "insufficient" ? "Insufficient data" : `${play.win.confidence} sample`,
   ]
@@ -180,8 +180,8 @@ export function OutcomeDumbbell({
               <span
                 title={
                   metric === "winRate"
-                    ? `Signals present ${pct(followed)}`
-                    : `Signals present ${formatDays(followed)}`
+                    ? `Prerequisites present ${pct(followed)}`
+                    : `Prerequisites present ${formatDays(followed)}`
                 }
                 className={`absolute top-1/2 size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full ${
                   muted ? "border border-foreground/40 bg-card" : "bg-[#3D8B8B]"
@@ -191,8 +191,8 @@ export function OutcomeDumbbell({
               <span
                 title={
                   metric === "winRate"
-                    ? `Signals missing ${pct(exception)}`
-                    : `Signals missing ${formatDays(exception)}`
+                    ? `Prerequisites missing ${pct(exception)}`
+                    : `Prerequisites missing ${formatDays(exception)}`
                 }
                 className={`absolute top-1/2 size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full ${
                   muted ? "border border-foreground/30 bg-card" : "bg-[#D9893A]"
@@ -204,8 +204,8 @@ export function OutcomeDumbbell({
         )
       })}
       <p className="text-[11px] text-muted-foreground">
-        Teal marks are {metric === "winRate" ? "win rate" : "cycle time"} when every success signal was
-        present. Amber marks are when at least one was missing.
+        Teal marks are {metric === "winRate" ? "win rate" : "cycle time"} when every recommended
+        prerequisite was present. Amber marks are when at least one was missing.
       </p>
     </div>
   )

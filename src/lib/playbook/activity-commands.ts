@@ -76,7 +76,7 @@ function normalizeChecks(
     return !status || !(PREREQUISITE_STATUSES as readonly string[]).includes(status)
   })
   if (missing.length > 0) {
-    throw new Error("Mark every success signal as Met or Not Met.")
+    throw new Error("Mark every recommended prerequisite as Met or Not Met.")
   }
   return prerequisites.map((item) => ({
     key: item.key,

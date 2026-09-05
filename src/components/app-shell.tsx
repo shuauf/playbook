@@ -7,7 +7,7 @@ export function AppShell({ children }: { children: ReactNode; workspaceName?: st
       <footer className="border-t border-border/80">
         <div className="mx-auto flex w-full max-w-[1320px] flex-col gap-1 px-4 py-3 text-xs text-muted-foreground md:flex-row md:items-center md:justify-between md:px-6">
           <p>See exactly what&apos;s happening. Know exactly what to fix.</p>
-          <p>Demo workspace</p>
+          <p>Track & iterate</p>
         </div>
       </footer>
     </div>

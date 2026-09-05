@@ -53,7 +53,7 @@ export function AdminView({
               <TableRow>
                 <TableHead>Play</TableHead>
                 <TableHead>Typical stages</TableHead>
-                <TableHead>Success signals</TableHead>
+                <TableHead>Recommended prerequisites</TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
