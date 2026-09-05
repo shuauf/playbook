@@ -170,7 +170,7 @@ export const PLAY_DETAIL: Record<string, PlayDetail> = {
       },
       {
         key: "demo-sign-next",
-        text: "A next-step owner was named before the call ended",
+        text: "A next-step owner was named before the activity ended",
       },
     ],
   },

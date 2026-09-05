@@ -21,16 +21,26 @@ function iconFor(playId: string) {
 function SidebarList({
   plays,
   activePlayId,
+  offbookActive,
+  offbookCount,
   showNames,
   onSelect,
+  onOffbook,
   onAdd,
 }: {
   plays: PlayDefinition[]
   activePlayId?: string
+  offbookActive: boolean
+  offbookCount: number
   showNames: boolean
   onSelect: (playId: string) => void
+  onOffbook: () => void
   onAdd: () => void
 }) {
+  const offbookLabel =
+    offbookCount === 1
+      ? "1 additional play not defined"
+      : `${offbookCount} additional plays not defined`
   return (
     <>
       <nav className="min-h-0 flex-1 space-y-0.5 overflow-y-auto px-2 py-2">
@@ -55,6 +65,23 @@ function SidebarList({
             </button>
           )
         })}
+        {offbookCount > 0 ? (
+          <button
+            type="button"
+            title={offbookLabel}
+            onClick={onOffbook}
+            className={cn(
+              "mt-1 flex w-full cursor-pointer items-center gap-2.5 rounded-xl bg-[#2B2A27] px-2 py-2 text-left text-[#f3f2ee] hover:bg-[#3a3936]",
+              showNames ? "" : "justify-center px-0",
+              offbookActive ? "ring-2 ring-[#D9893A]" : ""
+            )}
+          >
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-sm font-medium">
+              {offbookCount}
+            </span>
+            {showNames ? <span className="text-xs font-medium leading-snug">{offbookLabel}</span> : null}
+          </button>
+        ) : null}
       </nav>
       <div className="border-t border-border/80 p-2">
         <button
@@ -79,18 +106,24 @@ function SidebarList({
 export function PlaySidebar({
   plays,
   activePlayId,
+  offbookActive,
+  offbookCount,
   drawerOpen,
   onToggleDrawer,
   onCloseDrawer,
   onSelect,
+  onOffbook,
   onAdd,
 }: {
   plays: PlayDefinition[]
   activePlayId?: string
+  offbookActive: boolean
+  offbookCount: number
   drawerOpen: boolean
   onToggleDrawer: () => void
   onCloseDrawer: () => void
   onSelect: (playId: string) => void
+  onOffbook: () => void
   onAdd: () => void
 }) {
   return (
@@ -105,8 +138,11 @@ export function PlaySidebar({
         <SidebarList
           plays={plays}
           activePlayId={activePlayId}
+          offbookActive={offbookActive}
+          offbookCount={offbookCount}
           showNames
           onSelect={onSelect}
+          onOffbook={onOffbook}
           onAdd={onAdd}
         />
       </aside>
@@ -124,8 +160,11 @@ export function PlaySidebar({
         <SidebarList
           plays={plays}
           activePlayId={activePlayId}
+          offbookActive={offbookActive}
+          offbookCount={offbookCount}
           showNames={false}
           onSelect={onSelect}
+          onOffbook={onOffbook}
           onAdd={onAdd}
         />
       </aside>
@@ -159,9 +198,15 @@ export function PlaySidebar({
             <SidebarList
               plays={plays}
               activePlayId={activePlayId}
+              offbookActive={offbookActive}
+              offbookCount={offbookCount}
               showNames
               onSelect={(playId) => {
                 onSelect(playId)
+                onCloseDrawer()
+              }}
+              onOffbook={() => {
+                onOffbook()
                 onCloseDrawer()
               }}
               onAdd={() => {

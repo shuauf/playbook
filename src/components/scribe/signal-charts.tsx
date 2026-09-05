@@ -76,18 +76,15 @@ export function PlaySignalSection({
 
   return (
     <section className="mt-5">
-      <div className="mb-2 flex flex-wrap items-end justify-between gap-2">
-        <p className="text-xs text-muted-foreground">
-          Rates from logged {selectedName} calls in the {period}.
-        </p>
+      <div className="mb-2">
         <PlayPick plays={plays} value={playId} onChange={setPlayId} />
       </div>
       <div className="grid gap-3 lg:grid-cols-2">
         <div className="rounded-2xl bg-white p-3">
           <h2 className="font-heading text-xl">Recommended prerequisites</h2>
           <p className="mb-2 text-xs text-muted-foreground">
-            Each bar is the share of calls where that recommended prerequisite was present on the
-            call. This is presence, not win rate.
+            Share of {selectedName} activities in the {period} where each recommended prerequisite
+            was present.
           </p>
           <FrequencyBars
             rows={signalRows}
@@ -98,8 +95,8 @@ export function PlaySignalSection({
         <div className="rounded-2xl bg-white p-3">
           <h2 className="font-heading text-xl">Success criteria</h2>
           <p className="mb-2 text-xs text-muted-foreground">
-            First criterion: calls where every recommended prerequisite was present. Second: closed win
-            rate after this play.
+            How {selectedName} activities in the {period} met each success criterion. First: every
+            recommended prerequisite present. Second: closed win rate after this play.
           </p>
           <FrequencyBars
             rows={signRows}

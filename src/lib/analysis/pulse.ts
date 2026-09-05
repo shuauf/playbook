@@ -29,21 +29,21 @@ export function assemblePulse(input: {
       penalty !== null && penalty !== undefined
         ? ` Skipping a step on ${enforce.playName} has hurt win rate the most — those deals win ${percentPoints(penalty, 0)}% less often.`
         : ` ${enforce.playName} is where that happens most.`
-    return `About ${skipped}% of calls skipped a playbook step.${drop}`
+    return `About ${skipped}% of activities skipped a playbook step.${drop}`
   }
 
   if (highVolume && input.exceptionRate !== null && highVolume.win.confidence === "insufficient") {
-    return `Calls skip a playbook step most often on ${highVolume.playName}, though we do not have enough closed deals yet to know if that changes outcomes.`
+    return `Activities skip a playbook step most often on ${highVolume.playName}, though we do not have enough closed deals yet to know if that changes outcomes.`
   }
 
   if (highVolume && input.exceptionRate !== null) {
     const penalty = highVolume.win.difference
     const skipped = percentPoints(input.exceptionRate, 0)
     if (penalty !== null && highVolume.win.confidence !== "insufficient" && penalty > 0.02) {
-      return `About ${skipped}% of calls skipped a playbook step. ${highVolume.playName} is the most common place that happens, and those deals win ${percentPoints(penalty, 0)}% less often.`
+      return `About ${skipped}% of activities skipped a playbook step. ${highVolume.playName} is the most common place that happens, and those deals win ${percentPoints(penalty, 0)}% less often.`
     }
-    return `About ${skipped}% of calls skipped a playbook step. ${highVolume.playName} accounts for most of them.`
+    return `About ${skipped}% of activities skipped a playbook step. ${highVolume.playName} accounts for most of them.`
   }
 
-  return "Some calls skipped a playbook step, but no play yet has a clear win-rate comparison."
+  return "Some activities skipped a playbook step, but no play yet has a clear win-rate comparison."
 }

@@ -156,6 +156,21 @@ export function cycleComparison(
   }
 }
 
+export function portfolioWinLift(plays: Array<{ win: { metWins: number; metN: number; unmetWins: number; unmetN: number } }>) {
+  let metWins = 0
+  let metN = 0
+  let unmetWins = 0
+  let unmetN = 0
+  for (const play of plays) {
+    metWins += play.win.metWins
+    metN += play.win.metN
+    unmetWins += play.win.unmetWins
+    unmetN += play.win.unmetN
+  }
+  if (metN === 0 || unmetN === 0) return null
+  return metWins / metN - unmetWins / unmetN
+}
+
 export function playFindings(
   snapshot: AnalysisSnapshot,
   activities: AnalysisActivity[]
