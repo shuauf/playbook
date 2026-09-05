@@ -9,27 +9,61 @@ const CATEGORY_TONE: Record<LookCloserItem["kind"], string> = {
   define: "text-[#6F6E6A]",
 }
 
+function entityHref(mark: ObservationMark, itemHref?: string) {
+  if (mark.type === "play") return itemHref
+  if (mark.type === "person") return `/?modal=explorer&q=${encodeURIComponent(mark.value)}`
+  return undefined
+}
+
 function ObservationCopy({
   marks,
   className,
+  href,
+  onOpen,
 }: {
   marks: ObservationMark[]
   className?: string
+  href?: string
+  onOpen?: (href: string) => void
 }) {
   return (
     <span className={className}>
       {marks.map((mark, index) => {
+        const target = entityHref(mark, href)
         if (mark.type === "play") {
+          const pillClass =
+            "mx-0.5 inline-flex translate-y-[-1px] items-center rounded-full bg-[#2B2A27] px-2 py-0.5 text-[0.78em] font-semibold tracking-normal text-[#f3f2ee] align-baseline"
+          if (target && onOpen) {
+            return (
+              <button
+                key={`${mark.type}-${index}`}
+                type="button"
+                onClick={() => onOpen(target)}
+                className={cn(pillClass, "cursor-pointer hover:bg-[#3d3c38]")}
+              >
+                {mark.value}
+              </button>
+            )
+          }
           return (
-            <span
-              key={`${mark.type}-${index}`}
-              className="mx-0.5 inline-flex translate-y-[-1px] items-center rounded-full bg-[#2B2A27] px-2 py-0.5 text-[0.78em] font-semibold tracking-normal text-[#f3f2ee] align-baseline"
-            >
+            <span key={`${mark.type}-${index}`} className={pillClass}>
               {mark.value}
             </span>
           )
         }
         if (mark.type === "person") {
+          if (target && onOpen) {
+            return (
+              <button
+                key={`${mark.type}-${index}`}
+                type="button"
+                onClick={() => onOpen(target)}
+                className="cursor-pointer font-bold text-[#2B2A27] hover:underline"
+              >
+                {mark.value}
+              </button>
+            )
+          }
           return (
             <strong key={`${mark.type}-${index}`} className="font-bold text-[#2B2A27]">
               {mark.value}
@@ -111,25 +145,20 @@ export function AiObservationsHero({
       ) : (
         <div className="mt-4 grid gap-3 md:grid-cols-3">
           {items.map((item) => (
-            <button
+            <article
               key={item.id}
-              type="button"
-              onClick={() => onOpen(item.href)}
-              className={cn(
-                "flex h-full cursor-pointer flex-col rounded-xl bg-[#f7f7f5] px-4 py-4 text-left text-[#2B2A27]",
-                "shadow-sm transition-colors hover:bg-white"
-              )}
+              className="flex h-full flex-col rounded-xl bg-[#f7f7f5] px-4 py-4 text-left text-[#2B2A27] shadow-sm"
             >
               <span className={cn("text-[11px] font-semibold tracking-[0.14em] uppercase", CATEGORY_TONE[item.kind])}>
                 {item.label}
               </span>
               <p className="font-heading mt-2 text-lg leading-snug text-[#2B2A27]">
-                <ObservationCopy marks={item.headline} />
+                <ObservationCopy marks={item.headline} href={item.href} onOpen={onOpen} />
               </p>
               <p className="mt-2 text-xs leading-relaxed text-[#2B2A27]/55">
-                <ObservationCopy marks={item.detail} />
+                <ObservationCopy marks={item.detail} href={item.href} onOpen={onOpen} />
               </p>
-            </button>
+            </article>
           ))}
         </div>
       )}
